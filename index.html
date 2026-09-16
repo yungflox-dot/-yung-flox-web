@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Yung Flox On The Beat — Beats y producción musical">
+<title>Yung Flox On The Beat</title>
+<style>
+:root{--bg:#070509;--card:#120b19;--p:#8b35ff;--p2:#c07aff;--w:#fff;--m:#b9afc5;--line:#2b1b39}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Arial,sans-serif;background:radial-gradient(circle at 80% 0,#281044,transparent 32%),var(--bg);color:var(--w)}
+a{text-decoration:none;color:inherit}
+.wrap{width:min(1100px,92%);margin:auto}
+header{position:sticky;top:0;z-index:5;background:#070509dd;backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+nav{height:68px;display:flex;justify-content:space-between;align-items:center}
+.logo{font-weight:900}
+.logo span,.price,.amount{color:var(--p2)}
+nav ul{display:flex;gap:22px;list-style:none;color:var(--m);font-size:14px}
+.hero{text-align:center;min-height:60vh;display:grid;place-items:center;padding:50px 0}
+.badge{border:1px solid #53316d;color:var(--p2);border-radius:99px;padding:7px 12px;display:inline-block;font-size:11px;letter-spacing:2px;text-transform:uppercase}
+h1{font-size:clamp(44px,7vw,80px);line-height:.95;letter-spacing:-3px;margin:20px 0}
+.grad{background:linear-gradient(90deg,#fff,#c07aff);color:transparent;background-clip:text}
+.hero p{color:var(--m);max-width:650px;margin:0 auto 25px;font-size:18px}
+.btn{display:inline-flex;justify-content:center;align-items:center;padding:8px 14px;border-radius:8px;font-weight:800;border:1px solid var(--line);cursor:pointer;background:var(--p);color:#fff;font-size:12px;border-color:var(--p)}
+.primary{background:var(--p);border-color:var(--p);box-shadow:0 0 28px #8b35ff44}
+.btn+.btn{margin-left:8px}
+section{padding:50px 0}
+.head{margin-bottom:24px}
+.head h2{font-size:32px;margin:0 0 8px}
+.head p{color:var(--m)}
+
+/* DISEÑO COMPACTO DE BEATS */
+.grid{display:flex;flex-direction:column;gap:10px}
+.card{background:linear-gradient(145deg,#160d20,#0d0911);border:1px solid var(--line);border-radius:12px;display:flex;align-items:center;padding:10px 14px;gap:12px}
+.cover{width:42px;height:42px;min-width:42px;border-radius:6px;display:grid;place-items:center;font-size:14px;font-weight:900;background:linear-gradient(135deg,#160c20,#6c25b5,#0b0710)}
+.info{flex:1;min-width:140px;cursor:pointer}
+.title{font-size:15px;font-weight:900}
+.meta{color:var(--m);font-size:11px;margin-top:2px}
+audio{height:30px;width:200px}
+
+/* MODAL DE LICENCIAS Y DETALLES */
+.modal{display:none;position:fixed;inset:0;background:#000000bd;backdrop-filter:blur(5px);z-index:100;place-items:center;padding:20px}
+.modal.active{display:grid}
+.modal-content{background:#120b19;border:1px solid var(--line);border-radius:16px;width:min(520px,100%);padding:24px;position:relative;max-height:90vh;overflow-y:auto}
+.modal-close{position:absolute;top:14px;right:18px;background:none;border:none;color:var(--m);font-size:22px;cursor:pointer}
+.license-options{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+.license-btn{background:#1a1024;border:1px solid var(--line);padding:14px 16px;border-radius:10px;color:#fff;display:flex;flex-direction:column;gap:8px;cursor:pointer;text-align:left;transition:all 0.2s ease}
+.license-btn:hover{border-color:var(--p2);background:#231530}
+.license-header{display:flex;justify-content:space-between;align-items:center;width:100%;font-weight:bold;font-size:15px}
+.license-details{color:var(--m);font-size:12px;line-height:1.4;margin:0;padding-top:4px;border-top:1px dashed #2b1b39}
+
+.licenses{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}
+.license,.service,.contact{background:#100a16;border:1px solid var(--line);border-radius:18px;padding:24px}
+.license{cursor:pointer;transition:border-color 0.2s ease}
+.license:hover{border-color:var(--p2)}
+.license h3,.service h3{margin:0}
+.amount{font-size:29px;font-weight:900;margin:10px 0}
+.license p,.service li{color:var(--m);font-size:14px}
+.services{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.service ul{list-style:none;padding:0}
+.service li{padding:5px 0}
+.service li:before{content:"✓ ";color:var(--p2);font-weight:bold}
+.contact{text-align:center;padding:40px}
+.social{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px}
+footer{border-top:1px solid var(--line);padding:25px 0;color:var(--m);font-size:13px}
+.note{color:#877b91;font-size:12px;margin-top:14px}
+
+@media(max-width:600px){
+  .card{flex-wrap:wrap}
+  audio{width:100%;order:3}
+  nav ul{display:none}
+  .licenses,.services{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <nav>
+      <a class="logo" href="#inicio">Yung Flox <span>On The Beat</span></a>
+      <ul>
+        <li><a href="#beats">Beats</a></li>
+        <li><a href="#licencias">Licencias</a></li>
+        <li><a href="#produccion">Producción</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero" id="inicio">
+    <div class="wrap">
+      <span class="badge">Beats • Producción • Audio</span>
+      <h1>Yung Flox<br><span class="grad">On The Beat</span></h1>
+      <p>
+Instrumentales de alta calidad🔥 
+</p>
+      <a class="btn primary" href="#beats">Escuchar Beats</a>
+      <a class="btn" href="#produccion">Servicios de producción</a>
+    </div>
+  </section>
+
+  <section id="beats">
+    <div class="wrap">
+      <div class="head">
+        <h2>Beats disponibles</h2>
+        <p>Escucha la demo y elige la licencia que necesitas.</p>
+      </div>
+      <div class="grid">
+        <!-- BEAT 1 -->
+        <article class="card">
+          <div class="cover">YF</div>
+          <div class="info" onclick="openLicenses('Beat Demo 01')">
+            <div class="title">Beat Demo 01</div>
+            <div class="meta">Trap / Detroit • 140 BPM • D# Minor</div>
+          </div>
+          <audio controls preload="none"><source src="beats/beat-01.mp3" type="audio/mpeg"></audio>
+          <button class="btn" onclick="openLicenses('Beat Demo 01')">Licencia</button>
+        </article>
+
+        <!-- BEAT 2 -->
+        <article class="card">
+          <div class="cover">YF</div>
+          <div class="info" onclick="openLicenses('Beat Demo 02')">
+            <div class="title">Beat Demo 02</div>
+            <div class="meta">Boombap • 92 BPM • F Minor</div>
+          </div>
+          <audio controls preload="none"><source src="beats/beat-02.mp3" type="audio/mpeg"></audio>
+          <button class="btn" onclick="openLicenses('Beat Demo 03')">Licencia</button>
+        </article>
+
+        <!-- BEAT 3 -->
+        <article class="card">
+          <div class="cover">YF</div>
+          <div class="info" onclick="openLicenses('Beat Demo 03')">
+            <div class="title">Beat Demo 03</div>
+            <div class="meta">Trap • 150 BPM • A Minor</div>
+          </div>
+          <audio controls preload="none"><source src="beats/beat-03.mp3" type="audio/mpeg"></audio>
+          <button class="btn" onclick="openLicenses('Beat Demo 03')">Licencia</button>
+        </article>
+      </div>
+      <p class="note">Sustituye los MP3 y edita nombres, BPM y tonalidades en el código.</p>
+    </div>
+  </section>
+
+  <section id="licencias">
+    <div class="wrap">
+      <div class="head">
+        <h2>Licencias</h2>
+        <p>Haz clic en cualquier opción para ver la información detallada.</p>
+      </div>
+      <div class="licenses">
+        <div class="license" onclick="openLicenses('General')"><h3>MP3</h3><div class="amount">$300</div><p>Ver términos detallados de la licencia MP3 →</p></div>
+        <div class="license" onclick="openLicenses('General')"><h3>WAV</h3><div class="amount">$500</div><p>Ver términos detallados de la licencia WAV →</p></div>
+        <div class="license" onclick="openLicenses('General')"><h3>Stems</h3><div class="amount">$1,000</div><p>Ver términos detallados de la licencia Stems →</p></div>
+        <div class="license" onclick="openLicenses('General')"><h3>Exclusiva</h3><div class="amount">$3,500</div><p>Ver términos detallados de la Licencia Exclusiva →</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="produccion">
+    <div class="wrap">
+      <div class="head">
+        <h2>Producción musical</h2>
+        <p>Servicios desde grabación hasta el archivo final.</p>
+      </div>
+      <div class="services">
+        <div class="service">
+          <h3>Producción</h3>
+          <div class="amount">$1,500 MXN</div>
+          <ul>
+            <li>Grabación</li>
+            <li>Mix y máster</li>
+            <li>Beat con backs para show</li>
+            <li>Fotos en el estudio</li>
+            <li>WAV y MP3</li>
+          </ul>
+          <a class="btn primary" href="https://wa.me/526631173261?text=Hola,%20me%20interesa%20solicitar%20el%20paquete%20de%20Producción%20($1,500%20MXN)" target="_blank">Solicitar por WhatsApp</a>
+        </div>
+        <div class="service">
+          <h3>Producción Completa</h3>
+          <div class="amount">$2,999 MXN</div>
+          <ul>
+            <li>Beat personalizado</li>
+            <li>Grabación</li>
+            <li>Mix y máster</li>
+            <li>Beat con backs para show</li>
+            <li>Fotos en el estudio</li>
+            <li>WAV y MP3</li>
+          </ul>
+          <a class="btn primary" href="https://wa.me/526631173261?text=Hola,%20me%20interesa%20solicitar%20el%20paquete%20de%20Producción%20Completa%20($2,999%20MXN)" target="_blank">Solicitar por WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contacto">
+    <div class="wrap">
+      <div class="contact">
+        <h2>¿Listo para grabar?</h2>
+        <p class="meta">Encuentra tu próximo beat o solicita producción musical.</p>
+        <div class="social">
+          <a class="btn primary" href="https://wa.me/526631173261" target="_blank">WhatsApp</a>
+          <a class="btn" href="https://www.instagram.com/yf.theprod?stkn=djE3bml4dXNzNTVw&utm_source=qr" target="_blank">Instagram</a>
+          <a class="btn" href="https://www.tiktok.com/@yf.theprd?_r=1&_t=ZS-99lqqQ6VgHd" target="_blank">TikTok</a>
+          <a class="btn" href="https://youtube.com/@yf.theprod?si=MSW6XjaYfrQVgyn2" target="_blank">YouTube</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- MODAL DESPLEGABLE CON DETALLES DE LICENCIAS -->
+<div class="modal" id="licenseModal">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closeLicenses()">&times;</button>
+    <h3 id="modalBeatTitle" style="margin:0 0 4px">Seleccionar Licencia</h3>
+    <p style="color:var(--m);font-size:13px;margin:0">Consulta la información detallada y elige la opción para tu proyecto:</p>
+    
+    <div class="license-options">
+      <!-- LICENCIA MP3 -->
+      <button class="license-btn" onclick="selectLicense('MP3 — $300 MXN')">
+        <div class="license-header">
+          <span>MP3 LEASE</span>
+          <span style="color:var(--p2)">$300 MXN</span>
+        </div>
+        <p class="license-details">
+          • Archivo audio MP3 comprimido de alta calidad (320 kbps).<br>
+          • Hasta 10,000 reproducciones en plataformas de streaming (Spotify, Apple Music).<br>
+          • Uso comercial limitado para 1 video musical y shows en vivo sin lucro masivo.<br>
+          • El beat sigue estando disponible para otros artistas.
+        </p>
+      </button>
+
+      <!-- LICENCIA WAV -->
+      <button class="license-btn" onclick="selectLicense('WAV — $500 MXN')">
+        <div class="license-header">
+          <span>WAV LEASE</span>
+          <span style="color:var(--p2)">$500 MXN</span>
+        </div>
+        <p class="license-details">
+          • Archivo de audio WAV profesional (sin compresión / alta fidelidad).<br>
+          • Hasta 50,000 reproducciones en plataformas digitales.<br>
+          • Licencia comercial para distribución en tiendas digitales y videos musicales.<br>
+          • Calidad de audio idónea para procesos de mezcla y masterización.
+        </p>
+      </button>
+
+      <!-- LICENCIA STEMS -->
+      <button class="license-btn" onclick="selectLicense('STEMS — $1,000 MXN')">
+        <div class="license-header">
+          <span>STEMS (TRACK OUTS)</span>
+          <span style="color:var(--p2)">$1,000 MXN</span>
+        </div>
+        <p class="license-details">
+          • Incluye pistas separadas en WAV (baterías, melodías, bajos, efectos por separado).<br>
+          • Transmisión ilimitada o hasta 500,000 reproducciones en streaming.<br>
+          • Control total de mezcla y estructura para ingenieros de sonido en estudio.<br>
+          • Ideal para proyectos profesionales que requieren arreglos avanzados.
+        </p>
+      </button>
+
+      <!-- LICENCIA EXCLUSIVA -->
+      <button class="license-btn" onclick="selectLicense('EXCLUSIVA — $3,500 MXN')">
+        <div class="license-header">
+          <span>LICENCIA EXCLUSIVA</span>
+          <span style="color:var(--p2)">$3,500 MXN</span>
+        </div>
+        <p class="license-details">
+          • Derechos de uso exclusivo. El beat se retira inmediatamente de la venta.<br>
+          • Archivos WAV + MP3 + Stems (pistas por separado) de máxima calidad.<br>
+          • Reproducciones, distribución y presentaciones comerciales ilimitadas.<br>
+          • Contrato de cesión firmado para registro formal de la obra musical.
+        </p>
+      </button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">© <span id="year"></span> Yung Flox On The Beat. Todos los derechos reservados.</div>
+</footer>
+
+<script>
+document.getElementById("year").textContent = new Date().getFullYear();
+
+let currentBeat = "";
+
+function openLicenses(beatName) {
+  currentBeat = beatName;
+  document.getElementById("modalBeatTitle").textContent = beatName === 'General' ? 'Información de Licencias' : beatName;
+  document.getElementById("licenseModal").classList.add("active");
+}
+
+function closeLicenses() {
+  document.getElementById("licenseModal").classList.remove("active");
+}
+
+function selectLicense(license) {
+  let textBeat = currentBeat === 'General' ? '' : "\n- Beat: " + currentBeat;
+  let msg = encodeURIComponent("Hola Yung Flox! Me interesa adquirir información / compra:" + textBeat + "\n- Licencia seleccionada: " + license);
+  window.open("https://wa.me/526631173261?text=" + msg, "_blank");
+  closeLicenses();
+}
+</script>
+
+</body>
+</html>
