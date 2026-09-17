@@ -295,7 +295,7 @@ async function loadBeats() {
 
   try {
     const r = await fetch(
-      "https://vsvsxanuoscxjuayusju.supabase.co/rest/v1/beats?select=id,name,slug,bpm,musical_key,genre,mp3_path&active=eq.true&order=created_at.desc",
+      "https://vsvsxanuoscxjuayusju.supabase.co/rest/v1/beats?select=id,name,slug,bpm,musical_key,genre,mp3_path,cover_path&active=eq.true&order=created_at.desc",
       {
         headers: {
           apikey: SUPABASE_PUBLISHABLE_KEY,
@@ -317,7 +317,7 @@ async function loadBeats() {
 
     grid.innerHTML = beats.map(beat => `
       <article class="card">
-        <div class="cover">YF</div>
+        <div class="cover" data-cover-slug="${escapeHtml(beat.slug)}">YF</div>
 
         <div class="info">
           <div class="title">${escapeHtml(beat.name)}</div>
@@ -339,6 +339,17 @@ async function loadBeats() {
         </button>
       </article>
     `).join("");
+
+    const covers = grid.querySelectorAll("[data-cover-slug]");
+    for (const cover of covers) {
+      try {
+        const r = await fetch(API_BASE + "/api/beats/cover?slug=" + encodeURIComponent(cover.dataset.coverSlug), {headers: apiHeaders});
+        if (r.ok) {
+          const d = await r.json();
+          if (d.url) cover.innerHTML = '<img src="' + d.url.replace(/"/g, '&quot;') + '" alt="Portada" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">';
+        }
+      } catch(e) { console.error("Error cargando portada:", e); }
+    }
 
     const players = grid.querySelectorAll("audio[data-slug]");
 
