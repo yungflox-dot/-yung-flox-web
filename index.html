@@ -52,7 +52,7 @@ audio{height:30px;width:200px}
 
 .licenses{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}
 .license,.service,.contact{background:#100a16;border:1px solid var(--line);border-radius:18px;padding:24px}
-.license{cursor:pointer;transition:border-color 0.2s ease}
+.license{transition:border-color 0.2s ease}
 .license:hover{border-color:var(--p2)}
 .license h3,.service h3{margin:0}
 .amount{font-size:29px;font-weight:900;margin:10px 0}
@@ -65,6 +65,15 @@ audio{height:30px;width:200px}
 .social{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px}
 footer{border-top:1px solid var(--line);padding:25px 0;color:var(--m);font-size:13px}
 .note{color:#877b91;font-size:12px;margin-top:14px}
+.payment-modal .modal-content{width:min(620px,100%)}
+.payment-summary{background:#0d0812;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:16px 0}
+.payment-methods{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.payment-method{background:#1a1024;border:1px solid var(--line);border-radius:12px;padding:16px;color:#fff;cursor:pointer;text-align:left}
+.payment-method:hover{border-color:var(--p2);background:#231530}
+.payment-method h4{margin:0 0 6px;font-size:15px}.payment-method p{margin:0;color:var(--m);font-size:12px}
+.payment-icon{font-size:20px;margin-bottom:8px}.payment-detail{display:none;margin-top:14px;background:#0d0812;border:1px dashed #4a2b62;border-radius:12px;padding:15px;color:var(--m);font-size:13px;line-height:1.5}.payment-detail.active{display:block}.payment-back{background:none;border:0;color:var(--p2);padding:0;cursor:pointer;font-weight:700;margin-bottom:12px}
+@media(max-width:600px){.payment-methods{grid-template-columns:1fr}}
+
 
 @media(max-width:600px){
   .card{flex-wrap:wrap}
@@ -129,7 +138,7 @@ Instrumentales de alta calidad🔥
             <div class="meta">Boombap • 92 BPM • F Minor</div>
           </div>
           <audio controls preload="none"><source src="beats/beat-02.mp3" type="audio/mpeg"></audio>
-          <button class="btn" onclick="openLicenses('Beat Demo 03')">Licencia</button>
+          <button class="btn" onclick="openLicenses('Beat Demo 02')">Licencia</button>
         </article>
 
         <!-- BEAT 3 -->
@@ -154,11 +163,12 @@ Instrumentales de alta calidad🔥
         <p>Haz clic en cualquier opción para ver la información detallada.</p>
       </div>
       <div class="licenses">
-        <div class="license" onclick="openLicenses('General')"><h3>MP3</h3><div class="amount">$300</div><p>Ver términos detallados de la licencia MP3 →</p></div>
-        <div class="license" onclick="openLicenses('General')"><h3>WAV</h3><div class="amount">$500</div><p>Ver términos detallados de la licencia WAV →</p></div>
-        <div class="license" onclick="openLicenses('General')"><h3>Stems</h3><div class="amount">$1,000</div><p>Ver términos detallados de la licencia Stems →</p></div>
-        <div class="license" onclick="openLicenses('General')"><h3>Exclusiva</h3><div class="amount">$3,500</div><p>Ver términos detallados de la Licencia Exclusiva →</p></div>
+        <div class="license"><h3>MP3</h3><div class="amount">$350 MXN</div><p>Archivo MP3 y uso comercial según los términos de esta licencia.</p></div>
+        <div class="license"><h3>WAV</h3><div class="amount">$500 MXN</div><p>WAV de alta calidad para producción, mezcla y distribución.</p></div>
+        <div class="license"><h3>Stems</h3><div class="amount">$1,000 MXN</div><p>Incluye pistas separadas para mayor control de mezcla y producción.</p></div>
+        <div class="license"><h3>Exclusiva</h3><div class="amount">$3,500 MXN</div><p>Uso exclusivo del beat, con WAV, MP3 y stems.</p></div>
       </div>
+      <p class="note">Este apartado es informativo. Para comprar, selecciona <strong>Licencia</strong> dentro del beat que quieras.</p>
     </div>
   </section>
 
@@ -223,10 +233,10 @@ Instrumentales de alta calidad🔥
     
     <div class="license-options">
       <!-- LICENCIA MP3 -->
-      <button class="license-btn" onclick="selectLicense('MP3 — $300 MXN')">
+      <button class="license-btn" onclick="selectLicense('MP3 — $350 MXN')">
         <div class="license-header">
           <span>MP3 LEASE</span>
-          <span style="color:var(--p2)">$300 MXN</span>
+          <span style="color:var(--p2)">$350 MXN</span>
         </div>
         <p class="license-details">
           • Archivo audio MP3 comprimido de alta calidad (320 kbps).<br>
@@ -281,6 +291,28 @@ Instrumentales de alta calidad🔥
   </div>
 </div>
 
+<!-- MODAL DE PAGO -->
+<div class="modal payment-modal" id="paymentModal">
+  <div class="modal-content">
+    <button class="modal-close" onclick="closePayment()">&times;</button>
+    <button class="payment-back" onclick="backToLicenses()">← Volver a licencias</button>
+    <h3 style="margin:0 0 4px">Método de pago</h3>
+    <p style="color:var(--m);font-size:13px;margin:0">Primero indica tus datos para que podamos generar y enviar tu licencia automáticamente.</p>
+    <div style="display:grid;gap:10px;margin-top:14px">
+      <input id="customerName" placeholder="Tu nombre o nombre artístico" autocomplete="name" style="padding:12px;border-radius:10px;border:1px solid var(--line);background:#0d0812;color:#fff">
+      <input id="customerEmail" type="email" placeholder="Tu correo electrónico" autocomplete="email" style="padding:12px;border-radius:10px;border:1px solid var(--line);background:#0d0812;color:#fff">
+    </div>
+    <div class="payment-summary"><div style="font-size:12px;color:var(--m)">Beat</div><strong id="paymentBeat">Beat</strong><div style="height:8px"></div><div style="font-size:12px;color:var(--m)">Licencia</div><strong id="paymentLicense">Licencia</strong><div style="height:8px"></div><div style="font-size:12px;color:var(--m)">Total</div><strong id="paymentAmount">$350 MXN</strong></div>
+    <div class="payment-methods">
+      <button type="button" class="payment-method" onclick="startCheckout('mercadopago')"><div class="payment-icon">💳</div><h4>Mercado Pago</h4><p>Pago en línea.</p></button>
+      <button type="button" class="payment-method" onclick="startCheckout('paypal')"><div class="payment-icon">🅿️</div><h4>PayPal</h4><p>Pago en línea.</p></button>
+      <button type="button" class="payment-method" onclick="contactPayment()"><div class="payment-icon">💬</div><h4>WhatsApp</h4><p>Contacto directo.</p></button>
+    </div>
+    <div class="payment-detail" id="payment-mercadopago"><strong>Mercado Pago</strong><br><br><button class="btn primary" id="mercadoPagoButton" type="button">Crear pago seguro de <span id="mpAmount">$350 MXN</span></button></div>
+    <div class="payment-detail" id="payment-paypal"><strong>PayPal</strong><br><br><button class="btn primary" id="paypalButton" type="button">Continuar con PayPal — <span id="paypalAmount">$350 MXN</span></button></div>
+  </div>
+</div>
+
 <footer>
   <div class="wrap">© <span id="year"></span> Yung Flox On The Beat. Todos los derechos reservados.</div>
 </footer>
@@ -300,11 +332,60 @@ function closeLicenses() {
   document.getElementById("licenseModal").classList.remove("active");
 }
 
+let currentLicense = "";
+let currentOrderId = null;
+const API_BASE = window.YUNG_FLOX_API_BASE || "https://vsvsxanuoscxjuayusju.supabase.co/functions/v1/yung-flox-api";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_qHeIBR9SpL34qTY9qhar0w_IuETVQf5";
+const apiHeaders = {"Content-Type":"application/json","apikey":SUPABASE_PUBLISHABLE_KEY};
+function getLicenseAmount(license) {
+  const m = license.match(/\$([0-9,]+)/);
+  return m ? m[1].replace(/,/g, '') : '350';
+}
 function selectLicense(license) {
-  let textBeat = currentBeat === 'General' ? '' : "\n- Beat: " + currentBeat;
-  let msg = encodeURIComponent("Hola Yung Flox! Me interesa adquirir información / compra:" + textBeat + "\n- Licencia seleccionada: " + license);
-  window.open("https://wa.me/526631173261?text=" + msg, "_blank");
-  closeLicenses();
+  currentLicense = license;
+  const amount = getLicenseAmount(license);
+  document.getElementById("paymentBeat").textContent = currentBeat || "Beat";
+  document.getElementById("paymentLicense").textContent = license;
+  document.getElementById("paymentAmount").textContent = "$" + amount + " MXN";
+  document.getElementById("mpAmount").textContent = "$" + amount + " MXN";
+  document.getElementById("paypalAmount").textContent = "$" + amount + " MXN";
+  document.getElementById("licenseModal").classList.remove("active");
+  document.getElementById("paymentModal").classList.add("active");
+}
+async function createOrder(provider){
+  const email=document.getElementById("customerEmail").value.trim();
+  const customerName=document.getElementById("customerName").value.trim();
+  if(!customerName||!email){alert("Escribe tu nombre y correo para continuar.");return null;}
+  const r=await fetch(API_BASE+"/api/orders",{method:"POST",headers:apiHeaders,body:JSON.stringify({beat:currentBeat,license:currentLicense,email,customerName,provider})});
+  const d=await r.json(); if(!r.ok) throw new Error(d.error||"No se pudo crear la orden"); currentOrderId=d.orderId; return d;
+}
+async function startCheckout(method){
+  try{
+    const d=await createOrder(method);
+    if(method==='mercadopago'){const r=await fetch(API_BASE+"/api/mercadopago/create-checkout",{method:"POST",headers:apiHeaders,body:JSON.stringify({orderId:d.orderId})});const x=await r.json();if(!r.ok)throw new Error(x.error);window.location.href=x.checkoutUrl;}
+    if(method==='paypal'){const r=await fetch(API_BASE+"/api/paypal/create-order",{method:"POST",headers:apiHeaders,body:JSON.stringify({orderId:d.orderId})});const x=await r.json();if(!r.ok)throw new Error(x.error);window.location.href=x.approvalUrl;}
+  }catch(e){alert(e.message);}
+}
+function closePayment(){ document.getElementById("paymentModal").classList.remove("active"); }
+function backToLicenses(){ document.getElementById("paymentModal").classList.remove("active"); document.getElementById("licenseModal").classList.add("active"); }
+function showPaymentDetail(method){ document.querySelectorAll(".payment-detail").forEach(el=>el.classList.remove("active")); document.getElementById("payment-"+method).classList.add("active"); }
+async function handlePayPalReturn(){
+  const q=new URLSearchParams(location.search);
+  if(q.get('payment')==='paypal'&&q.get('token')&&q.get('order')){
+    try{
+      const r=await fetch(API_BASE+"/api/paypal/capture-order",{method:"POST",headers:apiHeaders,body:JSON.stringify({paypalOrderId:q.get('token'),orderId:q.get('order')})});
+      const d=await r.json();
+      if(d.status==='COMPLETED'){alert('Pago confirmado. Te enviamos automáticamente los archivos y la licencia a tu correo.');}
+      else alert('PayPal todavía no reporta el pago como completado.');
+    }catch(e){alert('No se pudo confirmar el pago con PayPal: '+e.message)}
+    history.replaceState({},document.title,location.pathname+location.hash);
+  }
+}
+handlePayPalReturn();
+
+function contactPayment(){
+  const msg=encodeURIComponent("Hola Yung Flox! Quiero comprar el beat: "+(currentBeat||"Beat")+"\nLicencia: "+currentLicense);
+  window.open("https://wa.me/526631173261?text="+msg,"_blank");
 }
 </script>
 
