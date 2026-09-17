@@ -389,5 +389,71 @@ function contactPayment(){
 }
 </script>
 
+
+<!-- YF_PAYMENT_OPTIONS_V2 -->
+<div id="yf-payment-options" style="margin:20px 0;padding:18px;border:1px solid rgba(255,255,255,.18);border-radius:14px;background:rgba(0,0,0,.18)">
+  <h3 style="margin:0 0 12px">Elige cómo pagar</h3>
+  <p style="margin:0 0 14px;opacity:.8">Después de confirmar tu compra podrás continuar con el método seleccionado.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:10px">
+    <button type="button" id="yf-paypal-btn" style="padding:12px 16px;border:0;border-radius:10px;cursor:pointer">🅿️ Pagar con PayPal</button>
+    <button type="button" id="yf-mp-btn" style="padding:12px 16px;border:0;border-radius:10px;cursor:pointer">💳 Pagar con Mercado Pago</button>
+    <button type="button" id="yf-wa-btn" style="padding:12px 16px;border:0;border-radius:10px;cursor:pointer">💬 Continuar por WhatsApp</button>
+  </div>
+  <div id="yf-payment-status" style="margin-top:12px;display:none"></div>
+</div>
+<script>
+(function(){
+  const API_BASE = "https://vsvsxanuoscxjuayusju.supabase.co/functions/v1/yung-flox-api";
+  const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_qHeIBR9SpL34qTY9qhar0w_IuETVQf5";
+  const prices = {MP3:350, WAV:500, STEMS:1000, EXCLUSIVA:3500};
+
+  function findValue(names){
+    for (const n of names) {
+      const el = document.querySelector(n);
+      if (el && el.value) return el.value;
+    }
+    return "";
+  }
+  function getData(){
+    const beat = findValue(['[name="beat"]','#beat','#selectedBeat','.selected-beat']) || "Beat seleccionado";
+    const license = (findValue(['[name="license"]','#license','#licencia','.selected-license']) || "MP3").toUpperCase();
+    const email = findValue(['[name="email"]','#email','#customer-email','input[type="email"]']);
+    const amount = prices[license] || 350;
+    return {beat, license, email, amount};
+  }
+  function status(msg){
+    const el=document.getElementById("yf-payment-status");
+    el.style.display="block"; el.textContent=msg;
+  }
+  document.getElementById("yf-paypal-btn").addEventListener("click", async function(){
+    const d=getData();
+    if(!d.email){ status("Escribe tu correo antes de continuar."); return; }
+    status("Conectando con PayPal Sandbox...");
+    try{
+      const r=await fetch(API_BASE+"/paypal/create-order",{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "apikey":SUPABASE_PUBLISHABLE_KEY,
+          "Authorization":"Bearer "+SUPABASE_PUBLISHABLE_KEY
+        },
+        body:JSON.stringify({beat:d.beat,license:d.license,email:d.email,provider:"paypal"})
+      });
+      const data=await r.json();
+      if(!r.ok || !data.approvalUrl) throw new Error(data.error || "No se pudo crear la orden.");
+      window.location.href=data.approvalUrl;
+    }catch(e){ status("PayPal no pudo iniciar la orden: "+e.message); }
+  });
+  document.getElementById("yf-mp-btn").addEventListener("click", function(){
+    window.open("https://link.mercadopago.com.mx/yungflox","_blank","noopener");
+  });
+  document.getElementById("yf-wa-btn").addEventListener("click", function(){
+    const d=getData();
+    const msg=encodeURIComponent("Hola Yung Flox, quiero comprar el beat "+d.beat+" con licencia "+d.license+" por $"+d.amount+" MXN.");
+    window.open("https://wa.me/?text="+msg,"_blank","noopener");
+  });
+})();
+</script>
+
 </body>
 </html>
