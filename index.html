@@ -289,7 +289,65 @@ Instrumentales de alta calidad🔥
 document.getElementById("year").textContent = new Date().getFullYear();
 
 async function loadBeats() {
-  // aquí pondremos la conexión
+  const grid = document.getElementById("beatsGrid");
+
+  grid.innerHTML = "<p class='note'>Cargando beats...</p>";
+
+  try {
+    const r = await fetch(
+      "https://vsvsxanuoscxjuayusju.supabase.co/rest/v1/beats?select=id,name,slug,bpm,musical_key,genre,mp3_path&active=eq.true&order=created_at.desc",
+      {
+        headers: {
+          apikey: SUPABASE_PUBLISHABLE_KEY,
+          Authorization: "Bearer " + SUPABASE_PUBLISHABLE_KEY
+        }
+      }
+    );
+
+    if (!r.ok) {
+      throw new Error("No se pudieron cargar los beats");
+    }
+
+    const beats = await r.json();
+
+    if (!beats.length) {
+      grid.innerHTML = "<p class='note'>No hay beats disponibles.</p>";
+      return;
+    }
+
+    grid.innerHTML = beats.map(beat => `
+      <article class="card">
+        <div class="cover">YF</div>
+
+        <div class="info">
+          <div class="title">${escapeHtml(beat.name)}</div>
+          <div class="meta">
+            ${escapeHtml(beat.genre || "Beat")} •
+            ${beat.bpm || "—"} BPM •
+            ${escapeHtml(beat.musical_key || "—")}
+          </div>
+        </div>
+
+        <button class="btn" onclick="openLicenses('${escapeHtml(beat.name)}')">
+          Licencia
+        </button>
+      </article>
+    `).join("");
+
+  } catch (e) {
+    console.error(e);
+    grid.innerHTML =
+      "<p class='note'>No se pudieron cargar los beats.</p>";
+  }
+}
+
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 let currentBeat = "";
