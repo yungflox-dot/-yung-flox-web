@@ -328,11 +328,43 @@ async function loadBeats() {
           </div>
         </div>
 
+        <audio
+          controls
+          preload="none"
+          data-slug="${escapeHtml(beat.slug)}">
+        </audio>
+
         <button class="btn" onclick="openLicenses('${escapeHtml(beat.name)}')">
           Licencia
         </button>
       </article>
     `).join("");
+
+    const players = grid.querySelectorAll("audio[data-slug]");
+
+    for (const player of players) {
+      const slug = player.dataset.slug;
+
+      try {
+        const previewResponse = await fetch(
+          API_BASE + "/api/beats/preview?slug=" + encodeURIComponent(slug),
+          {
+            headers: apiHeaders
+          }
+        );
+
+        if (!previewResponse.ok) {
+          throw new Error("No se pudo obtener el demo");
+        }
+
+        const previewData = await previewResponse.json();
+        player.src = previewData.url;
+
+      } catch (error) {
+        console.error("Error cargando demo:", error);
+        player.style.display = "none";
+      }
+    }
 
   } catch (e) {
     console.error(e);
