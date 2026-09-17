@@ -118,41 +118,9 @@ Instrumentales de alta calidad🔥
         <h2>Beats disponibles</h2>
         <p>Escucha la demo y elige la licencia que necesitas.</p>
       </div>
-      <div class="grid">
-        <!-- BEAT 1 -->
-        <article class="card">
-          <div class="cover">YF</div>
-          <div class="info" onclick="openLicenses('Beat Demo 01')">
-            <div class="title">Beat Demo 01</div>
-            <div class="meta">Trap / Detroit • 140 BPM • D# Minor</div>
-          </div>
-          <audio controls preload="none"><source src="beats/beat-01.mp3" type="audio/mpeg"></audio>
-          <button class="btn" onclick="openLicenses('Beat Demo 01')">Licencia</button>
-        </article>
-
-        <!-- BEAT 2 -->
-        <article class="card">
-          <div class="cover">YF</div>
-          <div class="info" onclick="openLicenses('Beat Demo 02')">
-            <div class="title">Beat Demo 02</div>
-            <div class="meta">Boombap • 92 BPM • F Minor</div>
-          </div>
-          <audio controls preload="none"><source src="beats/beat-02.mp3" type="audio/mpeg"></audio>
-          <button class="btn" onclick="openLicenses('Beat Demo 02')">Licencia</button>
-        </article>
-
-        <!-- BEAT 3 -->
-        <article class="card">
-          <div class="cover">YF</div>
-          <div class="info" onclick="openLicenses('Beat Demo 03')">
-            <div class="title">Beat Demo 03</div>
-            <div class="meta">Trap • 150 BPM • A Minor</div>
-          </div>
-          <audio controls preload="none"><source src="beats/beat-03.mp3" type="audio/mpeg"></audio>
-          <button class="btn" onclick="openLicenses('Beat Demo 03')">Licencia</button>
-        </article>
-      </div>
-      <p class="note">Sustituye los MP3 y edita nombres, BPM y tonalidades en el código.</p>
+     <div class="grid" id="beatsGrid">
+</div>
+<p class="note">Los beats se cargan automáticamente.</p>
     </div>
   </section>
 
@@ -319,6 +287,10 @@ Instrumentales de alta calidad🔥
 
 <script>
 document.getElementById("year").textContent = new Date().getFullYear();
+
+async function loadBeats() {
+  // aquí pondremos la conexión
+}
 
 let currentBeat = "";
 
