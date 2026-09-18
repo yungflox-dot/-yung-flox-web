@@ -313,7 +313,6 @@
     }
   </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/tus-js-client@4/dist/tus.min.js"></script>
 </head>
 
 <body>
@@ -618,35 +617,9 @@ async function sessionOrThrow(){const {data,error}=await sb.auth.getSession();if
 async function api(path,options={}){const session=await sessionOrThrow();const headers={...(options.headers||{}),Authorization:"Bearer "+session.access_token,apikey:SUPABASE_KEY};if(options.body&&!headers["Content-Type"])headers["Content-Type"]="application/json";const r=await fetch(API_BASE+path,{...options,headers});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"Error en la API");return d;}
 async function upload(file,path){
   if(!file)return null;
-  const session=await sessionOrThrow();
-  const endpoint=SUPABASE_URL+"/storage/v1/upload/resumable";
-  return await new Promise((resolve,reject)=>{
-    const upload=new tus.Upload(file,{
-      endpoint,
-      retryDelays:[0,1000,3000,5000,10000],
-      chunkSize:6*1024*1024,
-      uploadDataDuringCreation:true,
-      removeFingerprintOnSuccess:true,
-      metadata:{
-        bucketName:"beats",
-        objectName:path,
-        contentType:file.type||"application/octet-stream",
-        cacheControl:"3600"
-      },
-      headers:{
-        Authorization:"Bearer "+session.access_token,
-        apikey:SUPABASE_KEY,
-        "x-upsert":"true"
-      },
-      onError:error=>reject(new Error("Error subiendo "+file.name+": "+error.message)),
-      onProgress:(bytesUploaded,bytesTotal)=>{
-        const percent=Math.round((bytesUploaded/bytesTotal)*100);
-        setStatus("formStatus","Subiendo "+file.name+"... "+percent+"%");
-      },
-      onSuccess:()=>resolve(path)
-    });
-    upload.start();
-  });
+  const {error}=await sb.storage.from("beats").upload(path,file,{upsert:true});
+  if(error)throw new Error("Error subiendo "+file.name+": "+error.message);
+  return path;
 }
 async function login(e){e.preventDefault();setStatus("loginStatus","Iniciando sesión...");const {data,error}=await sb.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});if(error){setStatus("loginStatus",error.message,"status error");return;}try{await startAdmin(data.user);}catch(err){await sb.auth.signOut();setStatus("loginStatus",err.message,"status error");}}
 async function startAdmin(user){await api("/api/admin/me");$("loginSection").hidden=true;$("adminSection").hidden=false;$("logoutButton").style.display="block";await loadBeats();}
