@@ -28,6 +28,50 @@ const sb = createClient(
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
 );
 
+
+async function requireAdmin(req: Request) {
+  const authorization = req.headers.get("Authorization");
+  if (!authorization?.startsWith("Bearer ")) return { user: null, error: json({ error: "No autorizado" }, 401) };
+  const token = authorization.slice(7);
+  const { data: { user }, error: authError } = await sb.auth.getUser(token);
+  if (authError || !user) return { user: null, error: json({ error: "Sesión inválida" }, 401) };
+  const { data: admin, error } = await sb.from("admin_users").select("user_id").eq("user_id", user.id).maybeSingle();
+  if (error || !admin) return { user: null, error: json({ error: "No tienes permisos de administrador" }, 403) };
+  return { user, error: null };
+}
+async function adminMe(req: Request) {
+  const a = await requireAdmin(req); if (a.error) return a.error; return json({ ok: true, user: a.user });
+}
+async function adminListBeats(req: Request) {
+  const a = await requireAdmin(req); if (a.error) return a.error;
+  const { data, error } = await sb.from("beats").select("*").order("created_at", { ascending: false });
+  if (error) throw error; return json({ beats: data || [] });
+}
+async function adminCreateBeat(req: Request) {
+  const a = await requireAdmin(req); if (a.error) return a.error;
+  const body = await req.json(); const name=String(body.name||"").trim(); const slug=String(body.slug||"").trim();
+  if(!name||!slug)return json({error:"Faltan nombre o slug"},400);
+  const {data:existing}=await sb.from("beats").select("id").eq("slug",slug).maybeSingle();
+  if(existing)return json({error:"Ya existe un beat con ese slug"},409);
+  const {data,error}=await sb.from("beats").insert({name,slug,bpm:body.bpm?Number(body.bpm):null,musical_key:body.musical_key||null,genre:body.genre||null,mp3_path:body.mp3_path||null,wav_path:body.wav_path||null,stems_path:body.stems_path||null,exclusive_path:body.exclusive_path||null,cover_path:body.cover_path||null,active:true}).select("*").single();
+  if(error)throw error; return json({beat:data},201);
+}
+async function adminUpdateBeat(req: Request,id: string) {
+  const a=await requireAdmin(req); if(a.error)return a.error; const body=await req.json();
+  const update={name:String(body.name||"").trim(),slug:String(body.slug||"").trim(),bpm:body.bpm?Number(body.bpm):null,musical_key:body.musical_key||null,genre:body.genre||null,mp3_path:body.mp3_path||null,wav_path:body.wav_path||null,stems_path:body.stems_path||null,exclusive_path:body.exclusive_path||null,cover_path:body.cover_path||null};
+  if(!update.name||!update.slug)return json({error:"Faltan nombre o slug"},400);
+  const {data,error}=await sb.from("beats").update(update).eq("id",id).select("*").single(); if(error)throw error; return json({beat:data});
+}
+async function adminToggleBeat(req: Request,id: string) {
+  const a=await requireAdmin(req); if(a.error)return a.error; const body=await req.json();
+  const {data,error}=await sb.from("beats").update({active:Boolean(body.active)}).eq("id",id).select("*").single(); if(error)throw error; return json({beat:data});
+}
+async function publicSignedUrl(column: "mp3_path"|"cover_path",slug:string,ttl:number) {
+  const {data:beat,error}=await sb.from("beats").select(column).eq("slug",slug).eq("active",true).maybeSingle(); const p=beat?.[column];
+  if(error||!p)return null; const {data,error:signError}=await sb.storage.from("beats").createSignedUrl(p,ttl);
+  if(signError||!data?.signedUrl)return null; return data.signedUrl;
+}
+
 function amountFor(license: string) {
   const key = cleanLicense(license);
   if (!PRICE[key]) throw new Error("Licencia no válida");
@@ -204,6 +248,26 @@ Deno.serve(async (req) => {
 
     if (req.method === "POST" && path.endsWith("/api/webhooks/paypal")) {
       return await webhook(req);
+    }
+
+    if (req.method === "GET" && path.endsWith("/api/admin/me")) return await adminMe(req);
+    if (req.method === "GET" && path.endsWith("/api/admin/beats")) return await adminListBeats(req);
+    if (req.method === "POST" && path.endsWith("/api/admin/beats")) return await adminCreateBeat(req);
+    const adminToggle = path.match(/\/api\/admin\/beats\/([^/]+)\/toggle$/);
+    if (req.method === "POST" && adminToggle) return await adminToggleBeat(req, adminToggle[1]);
+    const adminEdit = path.match(/\/api\/admin\/beats\/([^/]+)$/);
+    if (req.method === "PATCH" && adminEdit) return await adminUpdateBeat(req, adminEdit[1]);
+    if (req.method === "GET" && path.endsWith("/api/beats/preview")) {
+      const slug = url.searchParams.get("slug");
+      if (!slug) return json({ error: "Falta el slug del beat" }, 400);
+      const signedUrl = await publicSignedUrl("mp3_path", slug, 600);
+      return signedUrl ? json({ url: signedUrl }) : json({ error: "No se pudo crear el enlace del demo" }, 404);
+    }
+    if (req.method === "GET" && path.endsWith("/api/beats/cover")) {
+      const slug = url.searchParams.get("slug");
+      if (!slug) return json({ error: "Falta el slug del beat" }, 400);
+      const signedUrl = await publicSignedUrl("cover_path", slug, 600);
+      return signedUrl ? json({ url: signedUrl }) : json({ error: "No se pudo crear el enlace de la portada" }, 404);
     }
 
     return json({ error: "Ruta no encontrada" }, 404);
