@@ -214,18 +214,6 @@ Instrumentales de alta calidad🔥
         </p>
       </button>
 
-      <button class="license-btn" onclick="contactLicense('MP3', '350')">
-        <div class="license-header">
-          <span>Contactar por WhatsApp</span>
-          <span style="color:var(--p2)">Otros métodos de pago</span>
-        </div>
-        <p class="license-details">
-          • Paga por transferencia u otro método disponible.<br>
-          • Solicita la Licencia MP3 directamente por WhatsApp.<br>
-          • Indica el beat y la licencia que deseas para coordinar el pago y la entrega.
-        </p>
-      </button>
-
       <!-- LICENCIA WAV -->
       <button class="license-btn" onclick="selectLicense('WAV — $500 MXN')">
         <div class="license-header">
@@ -237,18 +225,6 @@ Instrumentales de alta calidad🔥
           • Hasta 50,000 reproducciones en plataformas digitales.<br>
           • Licencia comercial para distribución en tiendas digitales y videos musicales.<br>
           • Calidad de audio idónea para procesos de mezcla y masterización.
-        </p>
-      </button>
-
-      <button class="license-btn" onclick="contactLicense('WAV', '500')">
-        <div class="license-header">
-          <span>Contactar por WhatsApp</span>
-          <span style="color:var(--p2)">Otros métodos de pago</span>
-        </div>
-        <p class="license-details">
-          • Paga por transferencia u otro método disponible.<br>
-          • Solicita la Licencia WAV directamente por WhatsApp.<br>
-          • Indica el beat y la licencia que deseas para coordinar el pago y la entrega.
         </p>
       </button>
 
@@ -298,6 +274,7 @@ Instrumentales de alta calidad🔥
     <div class="payment-methods">
       <button type="button" class="payment-method" onclick="startCheckout('mercadopago')"><div class="payment-icon">💳</div><h4>Mercado Pago</h4><p>Pago en línea.</p></button>
       <button type="button" class="payment-method" onclick="startCheckout('paypal')"><div class="payment-icon">🅿️</div><h4>PayPal</h4><p>Pago en línea.</p></button>
+      <button type="button" class="payment-method" style="grid-column:1 / -1" onclick="contactLicense(currentLicense, getLicenseAmount(document.getElementById('paymentLicense').textContent))"><div class="payment-icon">💬</div><h4>Contactar por WhatsApp</h4><p>Transferencia u otros métodos de pago.</p></button>
           </div>
     <div class="payment-detail" id="payment-mercadopago"><strong>Mercado Pago</strong><br><br><button class="btn primary" id="mercadoPagoButton" type="button">Crear pago seguro de <span id="mpAmount">$350 MXN</span></button></div>
     <div class="payment-detail" id="payment-paypal"><strong>PayPal</strong><br><br><button class="btn primary" id="paypalButton" type="button">Continuar con PayPal — <span id="paypalAmount">$350 MXN</span></button></div>
