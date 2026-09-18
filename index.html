@@ -449,16 +449,21 @@ async function handlePayPalReturn(){
     try{
       const r=await fetch(API_BASE+"/api/paypal/capture-order",{method:"POST",headers:apiHeaders,body:JSON.stringify({paypalOrderId:q.get('token'),orderId:q.get('order')})});
       const d=await r.json();
-      if(d.status==='COMPLETED'){
-  alert('Pago confirmado. Te enviamos automáticamente los archivos y la licencia a tu correo.');
-} else {
-  alert(
-    'PayPal no completó el pago.\n\n' +
-    'Estado: ' + (d.status || 'desconocido') + '\n' +
-    'Captura: ' + (d.captureStatus || 'desconocido') + '\n' +
-    'Razón: ' + (d.reason || 'sin razón')
-  );
-}
+
+      if(!r.ok){
+        const detail=d.error || d.message || "Error desconocido del servidor";
+        alert(
+          '❌ No se pudo confirmar el pago.\\n\\n' +
+          'Detalle: ' + detail
+        );
+      } else if(d.status==='COMPLETED'){
+        alert('✅ Pago confirmado. Recibirás el aviso del pedido por correo.');
+      } else {
+        alert(
+          '⚠️ PayPal no completó el pago.\\n\\n' +
+          'Estado: ' + (d.status || 'desconocido')
+        );
+      }
     }catch(e){alert('No se pudo confirmar el pago con PayPal: '+e.message)}
     history.replaceState({},document.title,location.pathname+location.hash);
   }
