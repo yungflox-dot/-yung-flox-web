@@ -165,6 +165,46 @@ async function createPaypalOrder(req: Request) {
   return json({ paypalOrderId: data.id, approvalUrl: approval });
 }
 
+async function sendAdminPaymentAlert(order: any) {
+  const resendApiKey = Deno.env.get("RESEND_API_KEY");
+  if (!resendApiKey) throw new Error("Falta RESEND_API_KEY");
+
+  const adminEmail = "flocswa@gmail.com";
+  const fromEmail = Deno.env.get("RESEND_FROM_EMAIL") || "onboarding@resend.dev";
+
+  const subject = `💰 Nuevo pago recibido — ${order.beat} (${order.license})`;
+  const text = [
+    "Nuevo pago recibido en Yung Flox.",
+    "",
+    `Beat: ${order.beat}`,
+    `Licencia: ${order.license}`,
+    `Monto: ${Number(order.amount).toFixed(2)} MXN`,
+    `Cliente: ${order.customer_name || "Cliente"}`,
+    `Correo: ${order.email}`,
+    `Proveedor: ${order.provider}`,
+    `Fecha: ${order.paid_at || new Date().toISOString()}`,
+    `Orden: ${order.order_id}`,
+  ].join("\n");
+
+  const r = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${resendApiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: fromEmail,
+      to: [adminEmail],
+      subject,
+      text,
+    }),
+  });
+
+  const data = await r.json();
+  if (!r.ok) throw new Error(JSON.stringify(data));
+  return data;
+}
+
 async function capturePaypalOrder(req: Request) {
   const { paypalOrderId, orderId } = await req.json();
   const token = await paypalToken();
@@ -200,15 +240,27 @@ async function capturePaypalOrder(req: Request) {
       return json({ error: "El pago no coincide con la orden" }, 400);
     }
 
-    await sb
+    const paidAt = new Date().toISOString();
+
+    const { data: updatedOrder, error: updateError } = await sb
       .from("orders")
       .update({
         status: "paid",
         provider_payment_id: paypalOrderId,
-        paid_at: new Date().toISOString(),
+        paid_at: paidAt,
       })
       .eq("order_id", orderId)
-      .eq("status", "pending");
+      .eq("status", "pending")
+      .select("*")
+      .single();
+
+    if (updateError) throw updateError;
+
+    try {
+      await sendAdminPaymentAlert(updatedOrder);
+    } catch (emailError) {
+      console.error("Error enviando aviso de pago al administrador:", emailError);
+    }
   }
 
   return json({ status: data.status });
