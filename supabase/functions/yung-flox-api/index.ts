@@ -9,8 +9,6 @@ const cors = {
 const PRICE: Record<string, number> = {
   MP3: 350,
   WAV: 500,
-  STEMS: 1000,
-  EXCLUSIVA: 3500,
 };
 
 const cleanLicense = (x: unknown) =>
