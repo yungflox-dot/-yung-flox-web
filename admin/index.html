@@ -401,7 +401,7 @@
         </h1>
 
         <p class="subtitle">
-          Agrega la información y selecciona los archivos del beat.
+          Agrega la información y selecciona la portada, MP3 y WAV. STEMS y EXCLUSIVA se gestionan manualmente por WhatsApp.
         </p>
 
         <form id="beatForm">
@@ -540,40 +540,7 @@
             </div>
 
 
-            <div class="file-box">
 
-              <label for="stemsFile">
-                STEMS
-              </label>
-
-              <input
-                id="stemsFile"
-                type="file"
-                accept=".zip,.rar,.7z,.wav">
-
-              <small>
-                ZIP recomendado
-              </small>
-
-            </div>
-
-
-            <div class="file-box">
-
-              <label for="exclusiveFile">
-                EXCLUSIVA
-              </label>
-
-              <input
-                id="exclusiveFile"
-                type="file"
-                accept=".zip,.rar,.7z,.wav,.mp3">
-
-              <small>
-                Archivo de la licencia exclusiva
-              </small>
-
-            </div>
 
           </div>
 
@@ -688,7 +655,7 @@ async function loadBeats(){$("beatsList").innerHTML='<div class="empty">Cargando
 function renderBeat(b){const el=document.createElement("article");el.className="beat";const info=document.createElement("div");info.className="beat-info";const name=document.createElement("div");name.className="beat-name";name.textContent=b.name;const meta=document.createElement("div");meta.className="beat-meta";meta.textContent=[b.genre||"Beat",b.bpm?b.bpm+" BPM":null,b.musical_key||null].filter(Boolean).join(" • ");const st=document.createElement("div");st.className="beat-status "+(b.active?"active":"hidden-status");st.textContent=b.active?"VISIBLE":"OCULTO";info.append(name,meta,st);const actions=document.createElement("div");actions.className="beat-actions";const edit=document.createElement("button");edit.className="btn btn-secondary";edit.textContent="Editar";edit.onclick=()=>startEditing(b);const toggle=document.createElement("button");toggle.className="btn btn-secondary";toggle.textContent=b.active?"Ocultar":"Mostrar";toggle.onclick=async()=>{try{await api("/api/admin/beats/"+b.id+"/toggle",{method:"POST",body:JSON.stringify({active:!b.active})});await loadBeats();}catch(e){alert(e.message);}};actions.append(edit,toggle);el.append(info,actions);return el;}
 function startEditing(b){editingBeat=b;$("beatId").value=b.id;$("beatName").value=b.name||"";$("beatBpm").value=b.bpm||"";$("beatKey").value=b.musical_key||"";$("beatGenre").value=b.genre||"";$("formTitle").textContent="Editar beat";$("saveButton").textContent="Guardar cambios";$("cancelButton").hidden=false;window.scrollTo({top:0,behavior:"smooth"});}
 function resetForm(){editingBeat=null;$("beatForm").reset();$("beatId").value="";$("formTitle").textContent="Agregar nuevo beat";$("saveButton").textContent="Guardar beat";$("cancelButton").hidden=true;$("formStatus").textContent="";}
-async function saveBeat(e){e.preventDefault();setStatus("formStatus","Subiendo archivos...");try{const name=$("beatName").value.trim();if(!name)throw new Error("Escribe el nombre del beat.");const slug=editingBeat?.slug||slugify(name);if(!slug)throw new Error("No se pudo generar el slug.");const base=slug+"/";const cover=$("coverFile").files[0],mp3=$("mp3File").files[0],wav=$("wavFile").files[0],stems=$("stemsFile").files[0],exclusive=$("exclusiveFile").files[0];const p={cover_path:editingBeat?.cover_path||null,mp3_path:editingBeat?.mp3_path||null,wav_path:editingBeat?.wav_path||null,stems_path:editingBeat?.stems_path||null,exclusive_path:editingBeat?.exclusive_path||null};if(cover)p.cover_path=await upload(cover,base+"cover"+ext(cover));if(mp3)p.mp3_path=await upload(mp3,base+"mp3"+ext(mp3));if(wav)p.wav_path=await upload(wav,base+"wav"+ext(wav));if(stems)p.stems_path=await upload(stems,base+"stems"+ext(stems));if(exclusive)p.exclusive_path=await upload(exclusive,base+"exclusive"+ext(exclusive));const body={name,slug,bpm:$("beatBpm").value?Number($("beatBpm").value):null,musical_key:$("beatKey").value.trim()||null,genre:$("beatGenre").value.trim()||null,...p};if(editingBeat)await api("/api/admin/beats/"+editingBeat.id,{method:"PATCH",body:JSON.stringify(body)});else await api("/api/admin/beats",{method:"POST",body:JSON.stringify(body)});setStatus("formStatus","Beat guardado correctamente.","status success");resetForm();await loadBeats();}catch(e){setStatus("formStatus",e.message,"status error");}}
+async function saveBeat(e){e.preventDefault();setStatus("formStatus","Subiendo archivos...");try{const name=$("beatName").value.trim();if(!name)throw new Error("Escribe el nombre del beat.");const slug=editingBeat?.slug||slugify(name);if(!slug)throw new Error("No se pudo generar el slug.");const base=slug+"/";const cover=$("coverFile").files[0],mp3=$("mp3File").files[0],wav=$("wavFile").files[0];const p={cover_path:editingBeat?.cover_path||null,mp3_path:editingBeat?.mp3_path||null,wav_path:editingBeat?.wav_path||null};if(cover)p.cover_path=await upload(cover,base+"cover"+ext(cover));if(mp3)p.mp3_path=await upload(mp3,base+"mp3"+ext(mp3));if(wav)p.wav_path=await upload(wav,base+"wav"+ext(wav));const body={name,slug,bpm:$("beatBpm").value?Number($("beatBpm").value):null,musical_key:$("beatKey").value.trim()||null,genre:$("beatGenre").value.trim()||null,...p};if(editingBeat)await api("/api/admin/beats/"+editingBeat.id,{method:"PATCH",body:JSON.stringify(body)});else await api("/api/admin/beats",{method:"POST",body:JSON.stringify(body)});setStatus("formStatus","Beat guardado correctamente.","status success");resetForm();await loadBeats();}catch(e){setStatus("formStatus",e.message,"status error");}}
 loginForm.addEventListener("submit",login);logoutButton.addEventListener("click",logout);beatForm.addEventListener("submit",saveBeat);cancelButton.addEventListener("click",resetForm);
 (async()=>{const {data}=await sb.auth.getSession();if(data.session){try{await startAdmin(data.session.user);}catch(e){await sb.auth.signOut();}}})();
 </script>
