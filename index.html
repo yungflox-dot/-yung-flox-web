@@ -203,7 +203,7 @@ Instrumentales de alta calidad🔥
       <!-- LICENCIA MP3 -->
       <button class="license-btn" onclick="selectLicense('MP3 — $350 MXN')">
         <div class="license-header">
-          <span>MP3 LEASE</span>
+          <span>Licencia MP3</span>
           <span style="color:var(--p2)">$350 MXN</span>
         </div>
         <p class="license-details">
@@ -217,7 +217,7 @@ Instrumentales de alta calidad🔥
       <!-- LICENCIA WAV -->
       <button class="license-btn" onclick="selectLicense('WAV — $500 MXN')">
         <div class="license-header">
-          <span>WAV LEASE</span>
+          <span>Licencia WAV</span>
           <span style="color:var(--p2)">$500 MXN</span>
         </div>
         <p class="license-details">
@@ -231,7 +231,7 @@ Instrumentales de alta calidad🔥
       <!-- LICENCIA STEMS -->
       <button class="license-btn" onclick="contactLicense('STEMS', '1,000')">
         <div class="license-header">
-          <span>STEMS (TRACK OUTS)</span>
+          <span>Licencia Stems</span>
           <span style="color:var(--p2)">$1,000 MXN</span>
         </div>
         <p class="license-details">
@@ -243,9 +243,9 @@ Instrumentales de alta calidad🔥
       </button>
 
       <!-- LICENCIA EXCLUSIVA -->
-      <button class="license-btn" onclick="contactLicense('EXCLUSIVA', 'Hacer Oferta')">
+      <button class="license-btn" onclick="contactLicense('EXCLUSIVA')">
         <div class="license-header">
-          <span>LICENCIA EXCLUSIVA</span>
+          <span>Licencia Exclusiva</span>
           <span style="color:var(--p2)">Hacer Oferta</span>
         </div>
         <p class="license-details">
@@ -467,7 +467,14 @@ loadBeats();
 handlePayPalReturn();
 
 function contactLicense(license, amount){
-  const msg=encodeURIComponent("Hola Yung Flox! Quiero solicitar el beat: "+(currentBeat||"Beat")+"\nLicencia: "+license+" — $"+amount+" MXN");
+  const lines=[
+    "Hola Yung Flox!",
+    "",
+    "Quiero solicitar el beat: "+(currentBeat||"Beat"),
+    "Licencia: "+license
+  ];
+  if(amount) lines.push("Precio: $"+amount+" MXN");
+  const msg=encodeURIComponent(lines.join("\n"));
   window.open("https://wa.me/526631173261?text="+msg,"_blank");
 }
 </script>
