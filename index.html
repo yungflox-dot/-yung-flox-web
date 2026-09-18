@@ -131,10 +131,10 @@ Instrumentales de alta calidad🔥
         <p>Haz clic en cualquier opción para ver la información detallada.</p>
       </div>
       <div class="licenses">
-        <div class="license"><h3>MP3</h3><div class="amount">$350 MXN</div><p>Archivo MP3 y uso comercial según los términos de esta licencia.</p></div>
-        <div class="license"><h3>WAV</h3><div class="amount">$500 MXN</div><p>WAV de alta calidad para producción, mezcla y distribución.</p></div>
-        <div class="license"><h3>Stems</h3><div class="amount">$1,000 MXN</div><p>Incluye pistas separadas para mayor control de mezcla y producción.</p></div>
-        <div class="license"><h3>Exclusiva</h3><div class="amount">$3,500 MXN</div><p>Uso exclusivo del beat, con WAV, MP3 y stems.</p></div>
+        <div class="license"><h3>MP3</h3><div class="amount">$350 MXN</div><p>Compra en línea. Recibirás automáticamente el MP3 y la licencia por correo.</p></div>
+        <div class="license"><h3>WAV</h3><div class="amount">$500 MXN</div><p>Compra en línea. Recibirás automáticamente el WAV y la licencia por correo.</p></div>
+        <div class="license"><h3>Stems</h3><div class="amount">$1,000 MXN</div><p>Solicitud manual por WhatsApp. El pago y la entrega se coordinan directamente.</p></div>
+        <div class="license"><h3>Exclusiva</h3><div class="amount">Hacer Oferta</div><p>Solicita una oferta por WhatsApp. El pago y la entrega se coordinan directamente.</p></div>
       </div>
       <p class="note">Este apartado es informativo. Para comprar, selecciona <strong>Licencia</strong> dentro del beat que quieras.</p>
     </div>
@@ -203,7 +203,7 @@ Instrumentales de alta calidad🔥
       <!-- LICENCIA MP3 -->
       <button class="license-btn" onclick="selectLicense('MP3 — $350 MXN')">
         <div class="license-header">
-          <span>MP3 LEASE</span>
+          <span>Licencia MP3</span>
           <span style="color:var(--p2)">$350 MXN</span>
         </div>
         <p class="license-details">
@@ -217,7 +217,7 @@ Instrumentales de alta calidad🔥
       <!-- LICENCIA WAV -->
       <button class="license-btn" onclick="selectLicense('WAV — $500 MXN')">
         <div class="license-header">
-          <span>WAV LEASE</span>
+          <span>Licencia WAV</span>
           <span style="color:var(--p2)">$500 MXN</span>
         </div>
         <p class="license-details">
@@ -229,27 +229,27 @@ Instrumentales de alta calidad🔥
       </button>
 
       <!-- LICENCIA STEMS -->
-      <button class="license-btn" onclick="selectLicense('STEMS — $1,000 MXN')">
+      <button class="license-btn" onclick="contactLicense('STEMS', '1,000')">
         <div class="license-header">
-          <span>STEMS (TRACK OUTS)</span>
+          <span>Licencia Stems</span>
           <span style="color:var(--p2)">$1,000 MXN</span>
         </div>
         <p class="license-details">
           • Incluye pistas separadas en WAV (baterías, melodías, bajos, efectos por separado).<br>
-          • Transmisión ilimitada o hasta 500,000 reproducciones en streaming.<br>
+          • Entrega manual por WhatsApp después de coordinar el pago.<br>
           • Control total de mezcla y estructura para ingenieros de sonido en estudio.<br>
           • Ideal para proyectos profesionales que requieren arreglos avanzados.
         </p>
       </button>
 
       <!-- LICENCIA EXCLUSIVA -->
-      <button class="license-btn" onclick="selectLicense('EXCLUSIVA — $3,500 MXN')">
+      <button class="license-btn" onclick="contactLicense('EXCLUSIVA')">
         <div class="license-header">
-          <span>LICENCIA EXCLUSIVA</span>
-          <span style="color:var(--p2)">$3,500 MXN</span>
+          <span>Licencia Exclusiva</span>
+          <span style="color:var(--p2)">Hacer Oferta</span>
         </div>
         <p class="license-details">
-          • Derechos de uso exclusivo. El beat se retira inmediatamente de la venta.<br>
+          • Solicitud y entrega manual por WhatsApp.<br>
           • Archivos WAV + MP3 + Stems (pistas por separado) de máxima calidad.<br>
           • Reproducciones, distribución y presentaciones comerciales ilimitadas.<br>
           • Contrato de cesión firmado para registro formal de la obra musical.
@@ -274,8 +274,7 @@ Instrumentales de alta calidad🔥
     <div class="payment-methods">
       <button type="button" class="payment-method" onclick="startCheckout('mercadopago')"><div class="payment-icon">💳</div><h4>Mercado Pago</h4><p>Pago en línea.</p></button>
       <button type="button" class="payment-method" onclick="startCheckout('paypal')"><div class="payment-icon">🅿️</div><h4>PayPal</h4><p>Pago en línea.</p></button>
-      <button type="button" class="payment-method" onclick="contactPayment()"><div class="payment-icon">💬</div><h4>WhatsApp</h4><p>Contacto directo.</p></button>
-    </div>
+          </div>
     <div class="payment-detail" id="payment-mercadopago"><strong>Mercado Pago</strong><br><br><button class="btn primary" id="mercadoPagoButton" type="button">Crear pago seguro de <span id="mpAmount">$350 MXN</span></button></div>
     <div class="payment-detail" id="payment-paypal"><strong>PayPal</strong><br><br><button class="btn primary" id="paypalButton" type="button">Continuar con PayPal — <span id="paypalAmount">$350 MXN</span></button></div>
   </div>
@@ -424,6 +423,7 @@ function selectLicense(license) {
   document.getElementById("mpAmount").textContent = "$" + amount + " MXN";
   document.getElementById("paypalAmount").textContent = "$" + amount + " MXN";
   document.getElementById("licenseModal").classList.remove("active");
+  if(key!=="MP3"&&key!=="WAV") return contactLicense(key, amount);
   document.getElementById("paymentModal").classList.add("active");
 }
 async function createOrder(provider){
@@ -466,8 +466,15 @@ async function handlePayPalReturn(){
 loadBeats();
 handlePayPalReturn();
 
-function contactPayment(){
-  const msg=encodeURIComponent("Hola Yung Flox! Quiero comprar el beat: "+(currentBeat||"Beat")+"\nLicencia: "+currentLicense);
+function contactLicense(license, amount){
+  const lines=[
+    "Hola Yung Flox!",
+    "",
+    "Quiero solicitar el beat: "+(currentBeat||"Beat"),
+    "Licencia: "+license
+  ];
+  if(amount) lines.push("Precio: $"+amount+" MXN");
+  const msg=encodeURIComponent(lines.join("\n"));
   window.open("https://wa.me/526631173261?text="+msg,"_blank");
 }
 </script>
