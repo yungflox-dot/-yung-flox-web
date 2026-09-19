@@ -691,7 +691,7 @@ async function mercadoPagoWebhook(req: Request) {
 
   if (signatureHeader && requestId) {
     if (!(await verifyMercadoPagoSignature(req, dataId))) {
-      return json({ ok: true, ignored: true });
+      return json({ error: "Firma de webhook inválida" }, 401);
     }
   }
 
