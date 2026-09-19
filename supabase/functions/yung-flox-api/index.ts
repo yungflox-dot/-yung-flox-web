@@ -771,7 +771,7 @@ async function paypalToken() {
   );
 
   const r = await fetch(
-    "https://api-m.sandbox.paypal.com/v1/oauth2/token",
+    "https://api-m.paypal.com/v1/oauth2/token",
     {
       method: "POST",
       headers: {
@@ -873,7 +873,7 @@ async function createPaypalOrder(
     "https://yungflox-dot.github.io/-yung-flox-web";
 
   const r = await fetch(
-    "https://api-m.sandbox.paypal.com/v2/checkout/orders",
+    "https://api-m.paypal.com/v2/checkout/orders",
     {
       method: "POST",
       headers: {
@@ -938,7 +938,7 @@ async function capturePaypalOrder(
   const token = await paypalToken();
 
   const r = await fetch(
-    `https://api-m.sandbox.paypal.com/v2/checkout/orders/${paypalOrderId}/capture`,
+    `https://api-m.paypal.com/v2/checkout/orders/${paypalOrderId}/capture`,
     {
       method: "POST",
       headers: {
@@ -1017,13 +1017,140 @@ async function capturePaypalOrder(
   });
 }
 
-async function webhook(req: Request) {
-  await req.text();
+async function verifyPaypalWebhook(req: Request, event: any) {
+  const webhookId = Deno.env.get("PAYPAL_WEBHOOK_ID");
+  if (!webhookId) throw new Error("Falta PAYPAL_WEBHOOK_ID");
 
-  return new Response("OK", {
-    status: 200,
-    headers: cors,
-  });
+  const token = await paypalToken();
+  const r = await fetch(
+    "https://api-m.paypal.com/v1/notifications/verify-webhook-signature",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        auth_algo: req.headers.get("paypal-auth-algo"),
+        cert_url: req.headers.get("paypal-cert-url"),
+        transmission_id: req.headers.get("paypal-transmission-id"),
+        transmission_sig: req.headers.get("paypal-transmission-sig"),
+        transmission_time: req.headers.get("paypal-transmission-time"),
+        webhook_id: webhookId,
+        webhook_event: event,
+      }),
+    }
+  );
+
+  const data = await r.json();
+  if (!r.ok || data.verification_status !== "SUCCESS") {
+    throw new Error("Firma de webhook PayPal inválida");
+  }
+}
+
+async function processPaypalCompletedOrder(
+  order: any,
+  providerPaymentId: string
+) {
+  if (order.status !== "paid") {
+    const { data: updated, error } = await sb
+      .from("orders")
+      .update({
+        status: "paid",
+        provider_payment_id: providerPaymentId,
+        paid_at: order.paid_at || new Date().toISOString(),
+      })
+      .eq("order_id", order.order_id)
+      .eq("status", "pending")
+      .select("*")
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (updated) {
+      try {
+        await sendAdminPaymentAlert(updated);
+      } catch (emailError) {
+        console.error("Error enviando aviso de pago al administrador:", emailError);
+      }
+    }
+  }
+
+  const { data: paidOrder } = await sb
+    .from("orders")
+    .select("*")
+    .eq("order_id", order.order_id)
+    .single();
+
+  if (!paidOrder || paidOrder.email_sent_at) return;
+
+  try {
+    await sendCustomerDelivery(paidOrder);
+  } catch (emailError) {
+    await sb
+      .from("orders")
+      .update({
+        email_last_error:
+          emailError instanceof Error ? emailError.message : String(emailError),
+      })
+      .eq("order_id", order.order_id);
+    throw emailError;
+  }
+}
+
+async function paypalWebhook(req: Request) {
+  const event = JSON.parse(await req.text() || "{}");
+
+  await verifyPaypalWebhook(req, event);
+
+  if (event.event_type !== "PAYMENT.CAPTURE.COMPLETED") {
+    return new Response("OK", { status: 200, headers: cors });
+  }
+
+  const resource = event.resource || {};
+  const paypalOrderId =
+    resource.supplementary_data?.related_ids?.order_id;
+
+  if (!paypalOrderId) {
+    return new Response("OK", { status: 200, headers: cors });
+  }
+
+  const token = await paypalToken();
+  const r = await fetch(
+    `https://api-m.paypal.com/v2/checkout/orders/${encodeURIComponent(paypalOrderId)}`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+
+  const orderData = await r.json();
+  if (!r.ok || orderData.status !== "COMPLETED") {
+    return new Response("OK", { status: 200, headers: cors });
+  }
+
+  const pu = orderData.purchase_units?.[0];
+  const orderId = pu?.custom_id || pu?.reference_id;
+  if (!orderId) return new Response("OK", { status: 200, headers: cors });
+
+  const { data: order } = await sb
+    .from("orders")
+    .select("*")
+    .eq("order_id", orderId)
+    .eq("provider", "paypal")
+    .maybeSingle();
+
+  if (
+    !order ||
+    pu?.amount?.currency_code !== "MXN" ||
+    Number(pu?.amount?.value) !== Number(order.amount)
+  ) {
+    return new Response("OK", { status: 200, headers: cors });
+  }
+
+  const capture = resource.id || paypalOrderId;
+  await processPaypalCompletedOrder(order, String(capture));
+
+  return new Response("OK", { status: 200, headers: cors });
 }
 
 Deno.serve(async (req) => {
@@ -1048,7 +1175,7 @@ Deno.serve(async (req) => {
       return json({
         ok: true,
         service:
-          "yung-flox-paypal-sandbox",
+          "yung-flox-paypal-live",
       });
     }
 
@@ -1083,7 +1210,7 @@ Deno.serve(async (req) => {
         "/api/webhooks/paypal"
       )
     ) {
-      return await webhook(req);
+      return await paypalWebhook(req);
     }
 
     if (
