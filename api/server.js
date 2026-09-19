@@ -53,13 +53,26 @@ app.post('/api/paypal/capture-order',async(req,res)=>{try{const {paypalOrderId,o
 
 async function paypalToken(){const auth=Buffer.from(`${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`).toString('base64');const r=await fetch('https://api-m.paypal.com/v1/oauth2/token',{method:'POST',headers:{Authorization:`Basic ${auth}`,'Content-Type':'application/x-www-form-urlencoded'},body:'grant_type=client_credentials'});const d=await r.json();if(!r.ok) throw new Error(JSON.stringify(d));return d.access_token;}
 
-app.post('/api/webhooks/mercadopago',async(req,res)=>{res.sendStatus(200);try{const type=req.body.type||req.body.topic;const paymentId=req.body.data?.id||req.body.id;if(type!=='payment'||!paymentId) return;const r=await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`,{headers:{Authorization:`Bearer ${process.env.MP_ACCESS_TOKEN}`}});const p=await r.json();if(p.status!=='approved') return;
- const orderId=p.external_reference||p.metadata?.order_id;
- if(!orderId) return;
- const {data:order}=await sb.from('orders').select('*').eq('order_id',orderId).single();
- if(!order || Number(p.transaction_amount)!==Number(order.amount) || p.currency_id!=='MXN') return;
- await fulfill(orderId,'mercadopago',String(paymentId));}catch(e){console.error('MP webhook',e);}});
-
+app.post('/api/webhooks/mercadopago',async(req,res)=>{
+ try{
+   const type=req.body.type||req.body.topic;
+   const paymentId=req.body.data?.id||req.body.id;
+   if(type!=='payment'||!paymentId) return res.sendStatus(200);
+   const r=await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`,{headers:{Authorization:`Bearer ${process.env.MP_ACCESS_TOKEN}`}});
+   if(!r.ok) throw new Error(`Mercado Pago payment lookup failed: HTTP ${r.status}`);
+   const p=await r.json();
+   if(p.status!=='approved') return res.sendStatus(200);
+   const orderId=p.external_reference||p.metadata?.order_id;
+   if(!orderId) return res.sendStatus(200);
+   const {data:order,error}=await sb.from('orders').select('*').eq('order_id',orderId).single();
+   if(error||!order || Number(p.transaction_amount)!==Number(order.amount) || p.currency_id!=='MXN') return res.sendStatus(200);
+   await fulfill(orderId,'mercadopago',String(paymentId));
+   return res.sendStatus(200);
+ }catch(e){
+   console.error('MP webhook',e);
+   return res.sendStatus(500);
+ }
+});
 app.post('/api/webhooks/paypal',async(req,res)=>{
  try{
    const event=req.body||{};
