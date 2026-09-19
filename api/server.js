@@ -100,7 +100,13 @@ app.post('/api/webhooks/paypal',async(req,res)=>{
 async function fulfill(orderId,provider,providerId){
  if(!orderId)return;
  const {data:order,error}=await sb.from('orders').select('*').eq('order_id',orderId).single();
- if(error||!order||order.status==='paid')return;
+ if(error||!order)return;
+ const now=new Date().toISOString();
+ if(order.status!=='paid'){
+   const updated=await sb.from('orders').update({status:'paid',provider_payment_id:providerId,paid_at:order.paid_at||now}).eq('order_id',orderId).eq('status','pending').select('order_id').single();
+   if(updated.error && !String(updated.error.message||'').includes('JSON object requested')) throw updated.error;
+ }
+ if(order.email_sent_at)return;
  const bucket=process.env.SUPABASE_PRIVATE_BUCKET||'private';
  const pdf=await makePdf(order);
  const licensePath=`licenses/${order.order_id}.pdf`;
@@ -116,12 +122,39 @@ async function fulfill(orderId,provider,providerId){
  const {data:lic}=await sb.storage.from(bucket).createSignedUrl(licensePath,60*60*24);
  if(lic?.signedUrl) links.push({label:'Licencia PDF',url:lic.signedUrl});
  if(!links.length) throw new Error(`No hay archivos configurados para el beat ${order.beat}`);
- const updated=await sb.from('orders').update({status:'paid',provider_payment_id:providerId,paid_at:new Date().toISOString()}).eq('order_id',orderId).eq('status','pending').select('order_id').single();
- if(updated.error && !String(updated.error.message||'').includes('JSON object requested')) throw updated.error;
- const html=`<h2>Gracias por tu compra, ${escapeHtml(order.customer_name)}.</h2><p>Beat: <b>${escapeHtml(order.beat)}</b><br>Licencia: <b>${escapeHtml(order.license)}</b><br>Orden: ${order.order_id}<br>Total: <b>$${Number(order.amount).toFixed(2)} MXN</b></p><p>Estos son tus archivos de compra. Los enlaces estarán disponibles durante 24 horas:</p><ul>${links.map(x=>`<li><a href="${x.url}">${escapeHtml(x.label)}</a></li>`).join('')}</ul><p>Conserva la licencia PDF como comprobante de autorización de uso.</p>`;
- const mail=await resend.emails.send({from:process.env.EMAIL_FROM,to:order.email,subject:`Tu compra de Yung Flox — ${order.beat}`,html});
- if(mail?.error) throw mail.error;
+ const html=`<h2>Gracias por tu compra, ${escapeHtml(order.customer_name)}.</h2><p>Beat: <b>${escapeHtml(order.beat)}</b><br>Licencia: <b>${escapeHtml(order.license)}</b><br>Orden: ${order.order_id}<br>Total: <b>${Number(order.amount).toFixed(2)} MXN</b></p><p>Estos son tus archivos de compra. Los enlaces estarán disponibles durante 24 horas:</p><ul>${links.map(x=>`<li><a href="${x.url}">${escapeHtml(x.label)}</a></li>`).join('')}</ul><p>Conserva la licencia PDF como comprobante de autorización de uso.</p>`;
+ try{
+   const mail=await resend.emails.send({from:process.env.EMAIL_FROM,to:order.email,subject:`Tu compra de Yung Flox — ${order.beat}`,html});
+   if(mail?.error) throw mail.error;
+   await sb.from('orders').update({email_sent_at:new Date().toISOString(),email_last_error:null}).eq('order_id',orderId);
+ }catch(e){
+   await sb.from('orders').update({email_last_error:String(e?.message||e)}).eq('order_id',orderId);
+   throw e;
+ }
 }
+
+async function requireAdmin(req,res){
+ const auth=String(req.headers.authorization||'');
+ if(!auth.startsWith('Bearer ')) return false;
+ const token=auth.slice(7);
+ const {data:{user},error}=await sb.auth.getUser(token);
+ if(error||!user)return false;
+ const {data:admin}=await sb.from('admin_users').select('user_id').eq('user_id',user.id).maybeSingle();
+ return !!admin;
+}
+
+app.post('/api/admin/orders/:orderId/resend-email',async(req,res)=>{
+ try{
+   if(!await requireAdmin(req,res)) return res.status(401).json({error:'No autorizado'});
+   const {orderId}=req.params;
+   const {data:order,error}=await sb.from('orders').select('*').eq('order_id',orderId).single();
+   if(error||!order)return res.status(404).json({error:'Orden no encontrada'});
+   if(order.status!=='paid')return res.status(409).json({error:'La orden todavía no está pagada'});
+   await sb.from('orders').update({email_sent_at:null}).eq('order_id',orderId);
+   await fulfill(orderId,order.provider,order.provider_payment_id);
+   res.json({ok:true,message:'Correo reenviado'});
+ }catch(e){console.error('Admin resend email',e);res.status(500).json({error:e.message});}
+});
 function slug(s){return String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');}
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
