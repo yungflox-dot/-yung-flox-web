@@ -964,6 +964,7 @@ async function capturePaypalOrder(
       .from("orders")
       .select("*")
       .eq("order_id", orderId)
+      .eq("provider", "paypal")
       .single();
 
     if (
@@ -983,33 +984,10 @@ async function capturePaypalOrder(
       );
     }
 
-    const paidAt = new Date().toISOString();
-
-    const { data: updatedOrder, error: updateError } = await sb
-      .from("orders")
-      .update({
-        status: "paid",
-        provider_payment_id: paypalOrderId,
-        paid_at: paidAt,
-      })
-      .eq("order_id", orderId)
-      .eq("status", "pending")
-      .select("*")
-      .single();
-
-    if (updateError) throw updateError;
-
-    try {
-      await sendAdminPaymentAlert(updatedOrder);
-    } catch (emailError) {
-      console.error("Error enviando aviso de pago al administrador:", emailError);
-    }
-
-    try {
-      await sendCustomerDelivery(updatedOrder);
-    } catch (emailError) {
-      console.error("Error enviando archivos al cliente:", emailError);
-    }
+    await processPaypalCompletedOrder(
+      order,
+      String(capture?.id || paypalOrderId)
+    );
   }
 
   return json({
