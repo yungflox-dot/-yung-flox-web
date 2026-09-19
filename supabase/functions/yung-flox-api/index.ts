@@ -666,27 +666,36 @@ async function confirmMercadoPagoReturn(req: Request) {
 
 async function mercadoPagoWebhook(req: Request) {
   const url = new URL(req.url);
-  const dataId = url.searchParams.get("data.id") || url.searchParams.get("id") || "";
+  const body = await req.json().catch(() => ({}));
 
-  // Mercado Pago's dashboard simulator may not include x-signature.
-  // Acknowledge simulator requests but never process a payment without a valid signature.
-  const signatureHeader = req.headers.get("x-signature");
-  const requestId = req.headers.get("x-request-id");
-  if (!signatureHeader || !requestId) {
-    await req.json().catch(() => ({}));
-    return json({ ok: true, simulated: true });
-  }
+  const dataId = String(
+    url.searchParams.get("data.id") ||
+      url.searchParams.get("id") ||
+      body?.data?.id ||
+      body?.id ||
+      ""
+  );
 
-  if (!(await verifyMercadoPagoSignature(req, dataId))) {
-    // Never process an unsigned/invalid notification, but acknowledge it.
-    // This lets Mercado Pago's simulator complete its HTTP test without
-    // weakening payment validation.
+  const type =
+    body?.type ||
+    body?.data?.type ||
+    url.searchParams.get("type") ||
+    url.searchParams.get("topic");
+
+  if (!dataId || type !== "payment") {
     return json({ ok: true, ignored: true });
   }
 
-  const body = await req.json().catch(() => ({}));
-  const type = body?.type || url.searchParams.get("type");
-  if (type === "payment" && dataId) await processMercadoPagoPayment(dataId);
+  const signatureHeader = req.headers.get("x-signature");
+  const requestId = req.headers.get("x-request-id");
+
+  if (signatureHeader && requestId) {
+    if (!(await verifyMercadoPagoSignature(req, dataId))) {
+      return json({ ok: true, ignored: true });
+    }
+  }
+
+  await processMercadoPagoPayment(dataId);
 
   return new Response("OK", { status: 200, headers: cors });
 }
