@@ -668,8 +668,12 @@ async function mercadoPagoWebhook(req: Request) {
   const url = new URL(req.url);
   const body = await req.json().catch(() => ({}));
 
+  const dataIdFromUrl = String(
+    url.searchParams.get("data.id") || ""
+  );
+
   const dataId = String(
-    url.searchParams.get("data.id") ||
+    dataIdFromUrl ||
       url.searchParams.get("id") ||
       body?.data?.id ||
       body?.id ||
@@ -689,8 +693,13 @@ async function mercadoPagoWebhook(req: Request) {
   const signatureHeader = req.headers.get("x-signature");
   const requestId = req.headers.get("x-request-id");
 
-  if (signatureHeader && requestId) {
-    if (!(await verifyMercadoPagoSignature(req, dataId))) {
+  if (signatureHeader || requestId) {
+    if (
+      !signatureHeader ||
+      !requestId ||
+      !dataIdFromUrl ||
+      !(await verifyMercadoPagoSignature(req, dataIdFromUrl))
+    ) {
       return json({ error: "Firma de webhook inválida" }, 401);
     }
   }
