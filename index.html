@@ -87,7 +87,39 @@ footer{border-top:1px solid #1d2023}
  .licenses{grid-template-columns:1fr 1fr}
 }
 </style>
-</head>
+<style id="jeuz-alignment-refine">
+/* Lighter background + centered search / featured player */
+:root{--bg:#0d0f11;--panel:#15181b;--panel2:#1a1d20;--line:#30343a}
+body{background:#0d0f11}
+header{background:rgba(13,15,17,.96);border-bottom-color:#292d32}
+main{background:#0d0f11}
+.beats-section{background:#0f1113}
+.beats-section>.wrap{max-width:1120px}
+.beat-market-head{display:flex;flex-direction:column;align-items:center;text-align:center;gap:16px;padding:8px 0 22px;margin-bottom:20px;border-bottom:0}
+.beat-market-head>div:first-child{width:100%}
+.beat-market-head h2{font-size:32px;margin:5px 0 6px}
+.beat-market-head p{font-size:10px}
+.beat-search{width:min(620px,100%);height:46px;margin:0 auto;border-radius:3px;background:#181b1f;border-color:#363b41;box-shadow:0 5px 18px rgba(0,0,0,.18)}
+.beat-search input{font-size:12px}
+.beat-filters{justify-content:center;margin-bottom:18px}
+.track-feature{width:min(900px,100%);margin:0 auto 22px;grid-template-columns:100px minmax(0,1fr) auto;background:#181b1f;border-color:#343940;border-radius:3px;padding:15px 17px}
+.feature-art{width:100px;height:100px}
+.feature-main{min-width:0}
+.feature-controls{max-width:100%;margin-top:13px}
+.progress{max-width:none;background:#383d43}
+.feature-license{border-radius:3px}
+.track-table-wrap{background:#121416;border-color:#30343a}
+.track-table-head{background:#1a1d20}
+.track-row:hover{background:#1b1e21}
+.licenses-section{}
+#licencias{background:#101214}
+#licencias>.wrap{max-width:1120px}
+@media(max-width:600px){
+ .beat-market-head{gap:13px}
+ .beat-search{width:100%}
+ .track-feature{width:100%;margin-bottom:18px}
+}
+</style></head>
 <body>
 <header><div class="wrap"><nav class="nav">
 <a class="logo" href="#inicio"><strong>YungFlox</strong><span>ON THE BEAT</span></a>
