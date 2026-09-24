@@ -615,9 +615,28 @@ function slugify(s){return String(s||"").normalize("NFD").replace(/[\u0300-\u036
 function ext(file){if(!file)return"";const p=file.name.split(".");return p.length>1?"."+p.pop().toLowerCase():"";}
 async function sessionOrThrow(){const {data,error}=await sb.auth.getSession();if(error||!data.session)throw new Error("Tu sesión expiró. Inicia sesión nuevamente.");return data.session;}
 async function api(path,options={}){const session=await sessionOrThrow();const headers={...(options.headers||{}),Authorization:"Bearer "+session.access_token,apikey:SUPABASE_KEY};if(options.body&&!headers["Content-Type"])headers["Content-Type"]="application/json";const r=await fetch(API_BASE+path,{...options,headers});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"Error en la API");return d;}
+async function optimizeCover(file){
+  if(!file)return null;
+  if(!file.type.startsWith("image/"))throw new Error("La portada debe ser una imagen.");
+  const url=URL.createObjectURL(file);
+  try{
+    const img=new Image();
+    await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(new Error("No se pudo leer la portada."));img.src=url});
+    const max=1200;
+    const scale=Math.min(1,max/Math.max(img.naturalWidth||img.width,img.naturalHeight||img.height));
+    const w=Math.max(1,Math.round((img.naturalWidth||img.width)*scale));
+    const h=Math.max(1,Math.round((img.naturalHeight||img.height)*scale));
+    const canvas=document.createElement("canvas");
+    canvas.width=w;canvas.height=h;
+    const ctx=canvas.getContext("2d");
+    ctx.drawImage(img,0,0,w,h);
+    const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error("No se pudo optimizar la portada.")),"image/webp",0.82));
+    return new File([blob],(file.name.replace(/\\.[^.]+$/,"")||"cover")+".webp",{type:"image/webp",lastModified:Date.now()});
+  }finally{URL.revokeObjectURL(url)}
+}
 async function upload(file,path){
   if(!file)return null;
-  const {error}=await sb.storage.from("beats").upload(path,file,{upsert:true});
+  const {error}=await sb.storage.from("beats").upload(path,file,{upsert:true,contentType:file.type,cacheControl:"31536000"});
   if(error)throw new Error("Error subiendo "+file.name+": "+error.message);
   return path;
 }
@@ -628,7 +647,7 @@ async function loadBeats(){$("beatsList").innerHTML='<div class="empty">Cargando
 function renderBeat(b){const el=document.createElement("article");el.className="beat";const info=document.createElement("div");info.className="beat-info";const name=document.createElement("div");name.className="beat-name";name.textContent=b.name;const meta=document.createElement("div");meta.className="beat-meta";meta.textContent=[b.genre||"Beat",b.bpm?b.bpm+" BPM":null,b.musical_key||null].filter(Boolean).join(" • ");const st=document.createElement("div");st.className="beat-status "+(b.active?"active":"hidden-status");st.textContent=b.active?"VISIBLE":"OCULTO";info.append(name,meta,st);const actions=document.createElement("div");actions.className="beat-actions";const edit=document.createElement("button");edit.className="btn btn-secondary";edit.textContent="Editar";edit.onclick=()=>startEditing(b);const toggle=document.createElement("button");toggle.className="btn btn-secondary";toggle.textContent=b.active?"Ocultar":"Mostrar";toggle.onclick=async()=>{try{await api("/api/admin/beats/"+b.id+"/toggle",{method:"POST",body:JSON.stringify({active:!b.active})});await loadBeats();}catch(e){alert(e.message);}};actions.append(edit,toggle);el.append(info,actions);return el;}
 function startEditing(b){editingBeat=b;$("beatId").value=b.id;$("beatName").value=b.name||"";$("beatBpm").value=b.bpm||"";$("beatKey").value=b.musical_key||"";$("beatGenre").value=b.genre||"";$("formTitle").textContent="Editar beat";$("saveButton").textContent="Guardar cambios";$("cancelButton").hidden=false;window.scrollTo({top:0,behavior:"smooth"});}
 function resetForm(){editingBeat=null;$("beatForm").reset();$("beatId").value="";$("formTitle").textContent="Agregar nuevo beat";$("saveButton").textContent="Guardar beat";$("cancelButton").hidden=true;$("formStatus").textContent="";}
-async function saveBeat(e){e.preventDefault();setStatus("formStatus","Subiendo archivos...");try{const name=$("beatName").value.trim();if(!name)throw new Error("Escribe el nombre del beat.");const slug=editingBeat?.slug||slugify(name);if(!slug)throw new Error("No se pudo generar el slug.");const base=slug+"/";const cover=$("coverFile").files[0],mp3=$("mp3File").files[0],wav=$("wavFile").files[0];const p={cover_path:editingBeat?.cover_path||null,mp3_path:editingBeat?.mp3_path||null,wav_path:editingBeat?.wav_path||null};if(cover)p.cover_path=await upload(cover,base+"cover"+ext(cover));if(mp3)p.mp3_path=await upload(mp3,base+"mp3"+ext(mp3));if(wav)p.wav_path=await upload(wav,base+"wav"+ext(wav));const body={name,slug,bpm:$("beatBpm").value?Number($("beatBpm").value):null,musical_key:$("beatKey").value.trim()||null,genre:$("beatGenre").value.trim()||null,...p};if(editingBeat)await api("/api/admin/beats/"+editingBeat.id,{method:"PATCH",body:JSON.stringify(body)});else await api("/api/admin/beats",{method:"POST",body:JSON.stringify(body)});setStatus("formStatus","Beat guardado correctamente.","status success");resetForm();await loadBeats();}catch(e){setStatus("formStatus",e.message,"status error");}}
+async function saveBeat(e){e.preventDefault();setStatus("formStatus","Subiendo archivos...");try{const name=$("beatName").value.trim();if(!name)throw new Error("Escribe el nombre del beat.");const slug=editingBeat?.slug||slugify(name);if(!slug)throw new Error("No se pudo generar el slug.");const base=slug+"/";const cover=$("coverFile").files[0],mp3=$("mp3File").files[0],wav=$("wavFile").files[0];const p={cover_path:editingBeat?.cover_path||null,mp3_path:editingBeat?.mp3_path||null,wav_path:editingBeat?.wav_path||null};if(cover){setStatus("formStatus","Optimizando portada...");const optimizedCover=await optimizeCover(cover);p.cover_path=await upload(optimizedCover,base+"cover.webp");}if(mp3)p.mp3_path=await upload(mp3,base+"mp3"+ext(mp3));if(wav)p.wav_path=await upload(wav,base+"wav"+ext(wav));const body={name,slug,bpm:$("beatBpm").value?Number($("beatBpm").value):null,musical_key:$("beatKey").value.trim()||null,genre:$("beatGenre").value.trim()||null,...p};if(editingBeat)await api("/api/admin/beats/"+editingBeat.id,{method:"PATCH",body:JSON.stringify(body)});else await api("/api/admin/beats",{method:"POST",body:JSON.stringify(body)});setStatus("formStatus","Beat guardado correctamente.","status success");resetForm();await loadBeats();}catch(e){setStatus("formStatus",e.message,"status error");}}
 loginForm.addEventListener("submit",login);logoutButton.addEventListener("click",logout);beatForm.addEventListener("submit",saveBeat);cancelButton.addEventListener("click",resetForm);
 (async()=>{const {data}=await sb.auth.getSession();if(data.session){try{await startAdmin(data.session.user);}catch(e){await sb.auth.signOut();}}})();
 </script>
