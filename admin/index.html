@@ -631,7 +631,7 @@ async function optimizeCover(file){
     const ctx=canvas.getContext("2d");
     ctx.drawImage(img,0,0,w,h);
     const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error("No se pudo optimizar la portada.")),"image/webp",0.82));
-    return new File([blob],(file.name.replace(/\\.[^.]+$/,"")||"cover")+".webp",{type:"image/webp",lastModified:Date.now()});
+    return new File([blob],(file.name.replace(/\.[^.]+$/,"")||"cover")+".webp",{type:"image/webp",lastModified:Date.now()});
   }finally{URL.revokeObjectURL(url)}
 }
 async function upload(file,path){
