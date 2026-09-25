@@ -264,22 +264,48 @@ async function adminRemoveBeat(req: Request, id: string) {
 
   if (a.error) return a.error;
 
-  const { data, error } = await sb
+  const { data: beat, error: findError } = await sb
     .from("beats")
-    .update({ active: false })
+    .select("id, name, mp3_path, wav_path, stems_path, exclusive_path, cover_path")
     .eq("id", id)
-    .select("id, name, active")
     .maybeSingle();
 
-  if (error) throw error;
+  if (findError) throw findError;
 
-  if (!data) {
+  if (!beat) {
     return json({ error: "Beat no encontrado" }, 404);
   }
 
+  const paths = [
+    beat.mp3_path,
+    beat.wav_path,
+    beat.stems_path,
+    beat.exclusive_path,
+    beat.cover_path,
+  ].filter((path): path is string => Boolean(path));
+
+  if (paths.length) {
+    const { error: storageError } = await sb.storage
+      .from("beats")
+      .remove(paths);
+
+    if (storageError) throw storageError;
+  }
+
+  const { error: deleteError } = await sb
+    .from("beats")
+    .delete()
+    .eq("id", id);
+
+  if (deleteError) throw deleteError;
+
   return json({
     ok: true,
-    beat: data,
+    deleted: {
+      id: beat.id,
+      name: beat.name,
+      storage_paths: paths,
+    },
   });
 }
 
