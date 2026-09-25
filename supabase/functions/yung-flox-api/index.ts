@@ -259,6 +259,30 @@ async function adminDeleteBeat(req: Request, id: string) {
   });
 }
 
+async function adminRemoveBeat(req: Request, id: string) {
+  const a = await requireAdmin(req);
+
+  if (a.error) return a.error;
+
+  const { data, error } = await sb
+    .from("beats")
+    .update({ active: false })
+    .eq("id", id)
+    .select("id, name, active")
+    .maybeSingle();
+
+  if (error) throw error;
+
+  if (!data) {
+    return json({ error: "Beat no encontrado" }, 404);
+  }
+
+  return json({
+    ok: true,
+    beat: data,
+  });
+}
+
 async function adminToggleBeat(
   req: Request,
   id: string
@@ -1302,6 +1326,21 @@ Deno.serve(async (req) => {
       return await adminDeleteBeat(
         req,
         adminDelete[1]
+      );
+    }
+
+    const adminRemove =
+      path.match(
+        /\/api\/admin\/beats\/([^/]+)\/remove$/
+      );
+
+    if (
+      req.method === "POST" &&
+      adminRemove
+    ) {
+      return await adminRemoveBeat(
+        req,
+        adminRemove[1]
       );
     }
 
