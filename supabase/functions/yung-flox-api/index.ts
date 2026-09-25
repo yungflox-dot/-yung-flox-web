@@ -208,6 +208,57 @@ async function adminUpdateBeat(
   });
 }
 
+async function adminDeleteBeat(req: Request, id: string) {
+  const a = await requireAdmin(req);
+
+  if (a.error) return a.error;
+
+  const { data: beat, error: findError } = await sb
+    .from("beats")
+    .select("id, name, mp3_path, wav_path, stems_path, exclusive_path, cover_path")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (findError) throw findError;
+
+  if (!beat) {
+    return json({ error: "Beat no encontrado" }, 404);
+  }
+
+  const paths = [
+    beat.mp3_path,
+    beat.wav_path,
+    beat.stems_path,
+    beat.exclusive_path,
+    beat.cover_path,
+  ].filter((path): path is string => Boolean(path));
+
+  if (paths.length) {
+    const { error: storageError } = await sb.storage
+      .from("beats")
+      .remove(paths);
+
+    if (storageError) {
+      throw storageError;
+    }
+  }
+
+  const { error: deleteError } = await sb
+    .from("beats")
+    .delete()
+    .eq("id", id);
+
+  if (deleteError) throw deleteError;
+
+  return json({
+    ok: true,
+    deleted: {
+      id: beat.id,
+      name: beat.name,
+    },
+  });
+}
+
 async function adminToggleBeat(
   req: Request,
   id: string
@@ -1237,6 +1288,21 @@ Deno.serve(async (req) => {
       path.endsWith("/api/admin/beats")
     ) {
       return await adminCreateBeat(req);
+    }
+
+    const adminDelete =
+      path.match(
+        /\/api\/admin\/beats\/([^/]+)$/
+      );
+
+    if (
+      req.method === "DELETE" &&
+      adminDelete
+    ) {
+      return await adminDeleteBeat(
+        req,
+        adminDelete[1]
+      );
     }
 
     const adminToggle =
