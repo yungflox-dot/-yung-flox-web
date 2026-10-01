@@ -427,11 +427,13 @@ async function sendCustomerDelivery(order: any) {
       "Hasta 10,000 reproducciones en plataformas de streaming (Spotify, Apple Music).",
       "Uso comercial limitado para 1 video musical y shows en vivo sin lucro masivo.",
       "El beat sigue estando disponible para otros artistas.",
+      "No activar CONTENT ID en YouTube.",
     ],
     WAV: [
       "Archivo de audio WAV profesional (sin compresión / alta fidelidad).",
       "Hasta 50,000 reproducciones en plataformas digitales.",
       "Licencia comercial para distribución en tiendas digitales y videos musicales.",
+      "No activar CONTENT ID en YouTube.",
       "Calidad de audio idónea para procesos de mezcla y masterización.",
     ],
   };
