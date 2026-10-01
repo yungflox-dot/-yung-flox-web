@@ -9,27 +9,78 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Permanent+Marker&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0d0f11;--text:#f5f7fa;--muted:#9ca5af;--line:#292d32;--max:1080px}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Arial,sans-serif}a{text-decoration:none;color:inherit}.wrap{width:min(var(--max),calc(100% - 40px));margin:auto}
+:root{--bg:#0d0f11;--panel:#111417;--text:#f5f7fa;--muted:#9ca5af;--line:#292d32;--max:1080px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Arial,sans-serif}a{text-decoration:none;color:inherit}
+.wrap{width:min(var(--max),calc(100% - 40px));margin:auto}
 header{height:74px;border-bottom:1px solid var(--line);background:rgba(13,15,17,.96);backdrop-filter:blur(14px);display:flex;align-items:center}.header-inner{width:min(var(--max),calc(100% - 40px));margin:auto;display:flex;align-items:center;justify-content:space-between}.logo{display:flex;flex-direction:column;line-height:.9;width:max-content}.logo strong{font-family:'Permanent Marker',cursive;font-size:28px;letter-spacing:-1px}.logo span{font-size:8px;letter-spacing:3.5px;font-weight:800;text-align:center;margin-top:7px}.back{font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#b8c0c8;border:1px solid #343940;border-radius:3px;padding:9px 13px}.back:hover{background:#fff;color:#080a0c;border-color:#fff}
-main{padding:62px 0 70px}.intro{text-align:center;margin-bottom:44px}.eyebrow{font-size:9px;font-weight:900;letter-spacing:3px;color:#8e98a2;text-transform:uppercase}.intro h1{font-size:clamp(34px,5vw,52px);letter-spacing:-1.7px;margin:10px 0 12px}.intro p{max-width:580px;margin:0 auto;color:var(--muted);font-size:12px;line-height:1.7}.section{margin-top:38px}.section-title{display:flex;align-items:end;justify-content:space-between;gap:20px;border-bottom:1px solid var(--line);padding-bottom:13px;margin-bottom:15px}.section-title h2{margin:0;font-size:15px;letter-spacing:1px;text-transform:uppercase}.section-title span{font-size:9px;color:#747e88;text-transform:uppercase;letter-spacing:1px}
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.card{background:#111417;border:1px solid #272c31;border-radius:3px;padding:11px 13px;min-height:82px;display:flex;flex-direction:column;justify-content:center}.card h3{font-size:9px;letter-spacing:1px;margin:0 0 6px;color:#9ca5af}.card p{display:none}.price{font-size:17px;font-weight:900;margin:0}.card small{color:#646d76;font-size:8px;margin-top:3px}.card .contact{display:none}.services{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.service{background:#111417;border:1px solid #30353b;border-radius:4px;padding:21px}.service h3{font-size:13px;margin:0 0 9px;letter-spacing:.7px}.service p{color:#aab2ba;font-size:10px;line-height:1.6;margin:0}
-.cta{margin-top:42px;text-align:center;border:1px solid #30353b;background:#111417;border-radius:4px;padding:30px}.cta h2{font-size:20px;margin:0 0 8px}.cta p{color:var(--muted);font-size:10px;margin:0 0 18px}.btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid #fff;background:#fff;color:#080a0c;border-radius:3px;padding:10px 18px;font-size:10px;font-weight:900;letter-spacing:.5px}.btn:hover{background:transparent;color:#fff}footer{border-top:1px solid var(--line);padding:24px 0;color:#747e88;font-size:9px;text-align:center;letter-spacing:.4px}
-@media(max-width:850px){.cards{grid-template-columns:repeat(4,1fr)}.services{grid-template-columns:1fr}.card{min-height:78px}}@media(max-width:600px){.wrap,.header-inner{width:calc(100% - 30px)}header{height:68px}.logo strong{font-size:25px}.back{font-size:8px;padding:8px 10px}main{padding:45px 0 55px}.intro{margin-bottom:35px}.intro h1{font-size:35px}.intro p{font-size:11px}.cards{grid-template-columns:repeat(2,1fr);gap:7px}.card{padding:10px;min-height:72px}.card h3{font-size:8px}.price{font-size:16px}.service{padding:17px}}
-</style></head>
+main{padding:62px 0 70px}.intro{text-align:center;margin-bottom:48px}.eyebrow{font-size:9px;font-weight:900;letter-spacing:3px;color:#8e98a2;text-transform:uppercase}.intro h1{font-size:clamp(34px,5vw,52px);letter-spacing:-1.7px;margin:10px 0 12px}.intro p{max-width:620px;margin:0 auto;color:var(--muted);font-size:12px;line-height:1.7}
+.section{margin-top:48px}.section-title{display:flex;align-items:end;justify-content:space-between;gap:20px;border-bottom:1px solid var(--line);padding-bottom:13px;margin-bottom:15px}.section-title h2{margin:0;font-size:15px;letter-spacing:1px;text-transform:uppercase}.section-title span{font-size:9px;color:#747e88;text-transform:uppercase;letter-spacing:1px}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.card{background:#111417;border:1px solid #272c31;border-radius:3px;padding:15px;display:flex;flex-direction:column;justify-content:flex-start;cursor:pointer;transition:.18s}.card:hover,.card.open{border-color:#59616a;background:#14181c}.card-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.card h3{font-size:10px;letter-spacing:1px;margin:0;color:#c2c9d0}.price{font-size:17px;font-weight:900;margin-top:7px}.arrow{font-size:13px;color:#7d8790;transition:.18s}.card.open .arrow{transform:rotate(180deg);color:#fff}.details{display:none;border-top:1px solid #292e34;margin-top:13px;padding-top:13px}.card.open .details{display:block}.details p{color:#aab2ba;font-size:10px;line-height:1.65;margin:0 0 12px}.details ul{margin:0;padding-left:16px;color:#aab2ba;font-size:10px;line-height:1.7}.details li{margin:2px 0}.contact-title{font-size:8px;text-transform:uppercase;letter-spacing:1.2px;color:#737d87;font-weight:900;margin:14px 0 7px}.contact-links{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.contact-links a{display:flex;align-items:center;justify-content:center;border:1px solid #343a40;background:#0c0f12;border-radius:3px;padding:8px 4px;font-size:8px;font-weight:900;letter-spacing:.3px}.contact-links a:hover{background:#fff;color:#080a0c;border-color:#fff}
+.services{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.service{background:#111417;border:1px solid #30353b;border-radius:4px;padding:18px;cursor:pointer;transition:.18s}.service:hover,.service.open{border-color:#59616a;background:#14181c}.service-head{display:flex;align-items:center;justify-content:space-between;gap:15px}.service h3{font-size:13px;margin:0;letter-spacing:.7px}.service .details{margin-top:15px}.service .details p{color:#aab2ba;font-size:10px;line-height:1.65;margin:0 0 11px}.service .details ul{list-style:none;padding:0;margin:0;color:#aab2ba;font-size:10px;line-height:1.7}.service .details li:before{content:"✓ ";color:#fff;font-weight:900}.service .contact-links{margin-top:11px}
+.cta{margin-top:42px;text-align:center;border:1px solid #30353b;background:#111417;border-radius:4px;padding:30px}.cta h2{font-size:20px;margin:0 0 8px}.cta p{color:var(--muted);font-size:10px;margin:0 0 18px}.btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid #fff;background:#fff;color:#080a0c;border-radius:3px;padding:10px 18px;font-size:10px;font-weight:900;letter-spacing:.5px}.btn:hover{background:transparent;color:#fff}
+footer{border-top:1px solid var(--line);padding:24px 0;color:#747e88;font-size:9px;text-align:center;letter-spacing:.4px}
+@media(max-width:850px){.cards{grid-template-columns:repeat(2,1fr)}.services{grid-template-columns:1fr}}
+@media(max-width:600px){.wrap,.header-inner{width:calc(100% - 30px)}header{height:68px}.logo strong{font-size:25px}.back{font-size:8px;padding:8px 10px}main{padding:45px 0 55px}.intro{margin-bottom:35px}.intro h1{font-size:35px}.intro p{font-size:11px}.cards{grid-template-columns:1fr 1fr;gap:7px}.card{padding:12px}.card h3{font-size:8px}.price{font-size:16px}.service{padding:16px}.contact-links{grid-template-columns:1fr}}
+</style>
+</head>
 <body>
 <header><div class="header-inner"><a class="logo" href="./"><strong>YungFlox</strong><span>THE PROD</span></a><a class="back" href="./">← Volver al sitio</a></div></header>
 <main><div class="wrap">
-<div class="intro"><div class="eyebrow">YungFlox — THE PROD</div><h1>Servicios &amp; Precios</h1><p>Información comercial de licencias de beats, beats personalizados y servicios de producción musical.</p></div>
-<section class="section licenses-mini"><div class="section-title"><h2>Beat Licenses</h2><span>Uso comercial</span></div><div class="cards">
-<article class="card"><h3>MP3</h3><div class="price">$350 MXN</div><small>Licencia</small></article>
-<article class="card"><h3>WAV</h3><div class="price">$500 MXN</div><small>Licencia</small></article>
-<article class="card"><h3>STEMS</h3><div class="price">$1,000 MXN</div><small>Licencia</small></article>
-<article class="card"><h3>EXCLUSIVE</h3><div class="price">$3,500 MXN</div><small>Licencia</small></article>
+<div class="intro"><div class="eyebrow">YungFlox — THE PROD</div><h1>Servicios &amp; Precios</h1><p>Consulta los detalles de cada licencia y servicio. Haz clic en cualquier opción para conocer lo que incluye y contactar directamente conmigo.</p></div>
+
+<section class="section"><div class="section-title"><h2>Beat Licenses</h2><span>Uso comercial</span></div><div class="cards">
+
+<article class="card" onclick="toggleCard(this)">
+<div class="card-head"><h3>MP3</h3><span class="arrow">⌄</span></div><div class="price">$350 MXN</div>
+<div class="details"><p>Licencia de uso comercial para trabajar con el beat en formato MP3.</p><ul><li>Archivo MP3 de alta calidad a 320 kbps.</li><li>Hasta 10,000 reproducciones en plataformas de streaming.</li><li>Uso comercial para 1 video musical.</li><li>Uso en presentaciones en vivo.</li><li>El beat permanece disponible para otros artistas.</li></ul><div class="contact-title">Contactar</div><div class="contact-links"><a href="https://wa.me/526631173261?text=Hola%20YungFlox%2C%20quiero%20la%20licencia%20MP3." target="_blank" rel="noopener">WhatsApp</a><a href="https://www.instagram.com/yf.theprod?stkn=djE3bml4dXNzNTVw&utm_source=qr" target="_blank" rel="noopener">Instagram</a><a href="https://www.tiktok.com/@yf.theprd?_r=1&_t=ZS-99lqqQ6VgHd" target="_blank" rel="noopener">TikTok</a></div></div>
+</article>
+
+<article class="card" onclick="toggleCard(this)">
+<div class="card-head"><h3>WAV</h3><span class="arrow">⌄</span></div><div class="price">$500 MXN</div>
+<div class="details"><p>Licencia comercial con archivo WAV profesional, pensada para una producción con mayor calidad de audio.</p><ul><li>Archivo WAV profesional.</li><li>Hasta 50,000 reproducciones en plataformas digitales.</li><li>Distribución digital comercial.</li><li>Uso en videos musicales.</li><li>Calidad ideal para mezcla y masterización.</li></ul><div class="contact-title">Contactar</div><div class="contact-links"><a href="https://wa.me/526631173261?text=Hola%20YungFlox%2C%20quiero%20la%20licencia%20WAV." target="_blank" rel="noopener">WhatsApp</a><a href="https://www.instagram.com/yf.theprod?stkn=djE3bml4dXNzNTVw&utm_source=qr" target="_blank" rel="noopener">Instagram</a><a href="https://www.tiktok.com/@yf.theprd?_r=1&_t=ZS-99lqqQ6VgHd" target="_blank" rel="noopener">TikTok</a></div></div>
+</article>
+
+<article class="card" onclick="toggleCard(this)">
+<div class="card-head"><h3>STEMS</h3><span class="arrow">⌄</span></div><div class="price">$1,000 MXN</div>
+<div class="details"><p>Licencia profesional con las pistas separadas del beat para tener mayor control durante la mezcla y producción.</p><ul><li>Pistas WAV separadas de baterías, melodías, bajos y efectos.</li><li>Control total de mezcla y arreglos.</li><li>Entrega manual después de coordinar el pago.</li><li>Ideal para proyectos de estudio y producciones profesionales.</li></ul><div class="contact-title">Contactar</div><div class="contact-links"><a href="https://wa.me/526631173261?text=Hola%20YungFlox%2C%20quiero%20la%20licencia%20STEMS." target="_blank" rel="noopener">WhatsApp</a><a href="https://www.instagram.com/yf.theprod?stkn=djE3bml4dXNzNTVw&utm_source=qr" target="_blank" rel="noopener">Instagram</a><a href="https://www.tiktok.com/@yf.theprd?_r=1&_t=ZS-99lqqQ6VgHd" target="_blank" rel="noopener">TikTok</a></div></div>
+</article>
+
+<article class="card" onclick="toggleCard(this)">
+<div class="card-head"><h3>EXCLUSIVE</h3><span class="arrow">⌄</span></div><div class="price">$3,500 MXN</div>
+<div class="details"><p>Licencia exclusiva para adquirir los derechos comerciales del beat mediante solicitud y entrega manual.</p><ul><li>WAV + MP3 + Stems en máxima calidad.</li><li>Reproducciones comerciales ilimitadas.</li><li>Distribución comercial ilimitada.</li><li>Presentaciones comerciales ilimitadas.</li><li>Contrato de cesión firmado para registro formal.</li><li>Solicitud y entrega manual por WhatsApp.</li></ul><div class="contact-title">Contactar</div><div class="contact-links"><a href="https://wa.me/526631173261?text=Hola%20YungFlox%2C%20quiero%20informacion%20sobre%20la%20licencia%20EXCLUSIVE." target="_blank" rel="noopener">WhatsApp</a><a href="https://www.instagram.com/yf.theprod?stkn=djE3bml4dXNzNTVw&utm_source=qr" target="_blank" rel="noopener">Instagram</a><a href="https://www.tiktok.com/@yf.theprd?_r=1&_t=ZS-99lqqQ6VgHd" target="_blank" rel="noopener">TikTok</a></div></div>
+</article>
+
 </div></section>
-<section class="section"><div class="section-title"><h2>Custom Beat</h2><span>Creado desde cero</span></div><div class="services"><article class="service"><h3>CUSTOM BEAT</h3><p>Beat personalizado creado desde cero según tu referencia, estilo, estructura y necesidades.</p></article></div></section>
-<section class="section"><div class="section-title"><h2>Production</h2><span>Producción musical</span></div><div class="services"><article class="service"><h3>PRODUCTION</h3><p>Producción, arreglo y desarrollo de tu proyecto musical.</p></article><article class="service"><h3>FULL PRODUCTION</h3><p>Producción completa del proyecto, desde la idea inicial hasta una producción terminada.</p></article></div></section>
-<div class="cta"><h2>¿Tienes un proyecto en mente?</h2><p>Contáctame para revisar disponibilidad y detalles del servicio.</p><a class="btn" href="https://wa.me/526631173261?text=Hola%20YungFlox%2C%20quiero%20informaci%C3%B3n%20sobre%20tus%20servicios.">CONTACTAR POR WHATSAPP</a></div>
+
+<section class="section"><div class="section-title"><h2>Servicios</h2><span>Trabajemos tu proyecto</span></div><div class="services">
+
+<article class="service" onclick="toggleCard(this)">
+<div class="service-head"><h3>CUSTOM BEAT</h3><span class="arrow">⌄</span></div>
+<div class="details"><p>Beat personalizado creado desde cero, desarrollado específicamente para tu proyecto y dirección artística.</p><ul><li>Producción desde cero basada en tu referencia.</li><li>Adaptación al estilo y sonido que buscas.</li><li>Desarrollo de estructura y arreglos.</li><li>Trabajo orientado a las necesidades de tu canción.</li><li>Comunicación directa para definir la dirección del beat.</li></ul><div class="contact-title">Solicitar servicio</div><div class="contact-links"><a href="https://wa.me/526631173261?text=Hola%20YungFlox%2C%20quiero%20un%20CUSTOM%20BEAT." target="_blank" rel="noopener">WhatsApp</a><a href="https://www.instagram.com/yf.theprod?stkn=djE3bml4dXNzNTVw&utm_source=qr" target="_blank" rel="noopener">Instagram</a><a href="https://www.tiktok.com/@yf.theprd?_r=1&_t=ZS-99lqqQ6VgHd" target="_blank" rel="noopener">TikTok</a></div></div>
+</article>
+
+<article class="service" onclick="toggleCard(this)">
+<div class="service-head"><h3>PRODUCTION</h3><span class="arrow">⌄</span></div>
+<div class="details"><p>Servicio de producción, arreglo y desarrollo musical para llevar tu idea a una producción más completa y definida.</p><ul><li>Desarrollo y arreglo de tu proyecto musical.</li><li>Trabajo sobre la estructura y dinámica de la canción.</li><li>Desarrollo de elementos musicales y sonoros.</li><li>Enfoque en cohesión, energía y dirección del proyecto.</li><li>Proceso adaptado a las necesidades de cada canción.</li></ul><div class="contact-title">Solicitar servicio</div><div class="contact-links"><a href="https://wa.me/526631173261?text=Hola%20YungFlox%2C%20quiero%20informacion%20sobre%20PRODUCTION." target="_blank" rel="noopener">WhatsApp</a><a href="https://www.instagram.com/yf.theprod?stkn=djE3bml4dXNzNTVw&utm_source=qr" target="_blank" rel="noopener">Instagram</a><a href="https://www.tiktok.com/@yf.theprd?_r=1&_t=ZS-99lqqQ6VgHd" target="_blank" rel="noopener">TikTok</a></div></div>
+</article>
+
+<article class="service" onclick="toggleCard(this)">
+<div class="service-head"><h3>FULL PRODUCTION</h3><span class="arrow">⌄</span></div>
+<div class="details"><p>Producción completa del proyecto, desde la idea inicial hasta una producción terminada y lista para avanzar a las siguientes etapas.</p><ul><li>Desarrollo de la idea inicial.</li><li>Producción y arreglo completo.</li><li>Construcción y desarrollo de los elementos musicales.</li><li>Dirección de la estructura y evolución de la canción.</li><li>Enfoque integral de la producción del proyecto.</li></ul><div class="contact-title">Solicitar servicio</div><div class="contact-links"><a href="https://wa.me/526631173261?text=Hola%20YungFlox%2C%20quiero%20informacion%20sobre%20FULL%20PRODUCTION." target="_blank" rel="noopener">WhatsApp</a><a href="https://www.instagram.com/yf.theprod?stkn=djE3bml4dXNzNTVw&utm_source=qr" target="_blank" rel="noopener">Instagram</a><a href="https://www.tiktok.com/@yf.theprd?_r=1&_t=ZS-99lqqQ6VgHd" target="_blank" rel="noopener">TikTok</a></div></div>
+</article>
+
+</div></section>
+
+<div class="cta"><h2>¿Tienes un proyecto en mente?</h2><p>Abre cualquier servicio o licencia para ver los detalles y contactar directamente.</p><a class="btn" href="https://wa.me/526631173261?text=Hola%20YungFlox%2C%20quiero%20informacion%20sobre%20tus%20servicios." target="_blank" rel="noopener">CONTACTAR POR WHATSAPP</a></div>
 </div></main>
 <footer><div class="wrap">YungFlox — THE PROD · © <span id="year"></span> · Todos los derechos reservados.</div></footer>
-<script>document.getElementById("year").textContent=new Date().getFullYear();</script>
+<script>
+function toggleCard(card){
+  const wasOpen=card.classList.contains('open');
+  document.querySelectorAll('.card.open,.service.open').forEach(x=>x.classList.remove('open'));
+  if(!wasOpen)card.classList.add('open');
+}
+document.querySelectorAll('.contact-links a').forEach(a=>a.addEventListener('click',e=>e.stopPropagation()));
+document.getElementById("year").textContent=new Date().getFullYear();
+</script>
 </body></html>
