@@ -433,6 +433,7 @@ async function sendCustomerDelivery(order: any) {
       "Archivo de audio WAV profesional (sin compresión / alta fidelidad).",
       "Hasta 50,000 reproducciones en plataformas digitales.",
       "Licencia comercial para distribución en tiendas digitales y videos musicales.",
+      "El beat sigue estando disponible para otros artistas.",
       "No activar CONTENT ID en YouTube.",
       "Calidad de audio idónea para procesos de mezcla y masterización.",
     ],
