@@ -181,6 +181,7 @@ function applyLanguage(){document.documentElement.lang=lang;const t=T[lang];docu
 function toggleLang(){document.getElementById("langMenu").classList.toggle("open")}
 function setLanguage(next){lang=next;applyLanguage();document.getElementById("langMenu").classList.remove("open")}
 document.addEventListener("click",e=>{if(!e.target.closest(".lang"))document.getElementById("langMenu").classList.remove("open")});
+document.addEventListener("keydown",e=>{if(e.key!=="Escape")return;const payment=document.getElementById("paymentModal"),licenses=document.getElementById("licenseModal"),cart=document.getElementById("cartDrawer"),language=document.getElementById("langMenu");let closed=false;if(payment&&payment.classList.contains("active")){closePayment();closed=true}if(licenses&&licenses.classList.contains("active")){closeLicenses();closed=true}if(cart&&cart.classList.contains("open")){cart.classList.remove("open");closed=true}if(language&&language.classList.contains("open")){language.classList.remove("open");closed=true}if(closed)e.preventDefault()});
 document.getElementById("year").textContent=new Date().getFullYear();
 let currentBeat="",currentLicense="",currentOrderId=null;
 const API_BASE=window.YUNG_FLOX_API_BASE||"https://vsvsxanuoscxjuayusju.supabase.co/functions/v1/yung-flox-api";
